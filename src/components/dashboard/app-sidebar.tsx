@@ -1,23 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Box,
-  ChevronDown,
-  Code,
-  FileText,
-  Folder,
-  Image as ImageIcon,
-  Link as LinkIcon,
-  type LucideIcon,
-  MessageSquare,
-  Paperclip,
-  Settings,
-  Star,
-  Terminal,
-} from "lucide-react";
+import { Box, ChevronDown, Folder, Settings, Star } from "lucide-react";
 
 import { collections, currentUser, itemTypes } from "@/lib/mock-data";
+import { iconByName } from "@/components/dashboard/type-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,17 +25,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-
-/** Maps a mock-data icon name to its Lucide component. */
-const typeIcons: Record<string, LucideIcon> = {
-  Code,
-  MessageSquare,
-  Terminal,
-  FileText,
-  Paperclip,
-  Image: ImageIcon,
-  Link: LinkIcon,
-};
 
 const favoriteCollections = collections.filter((c) => c.isFavorite);
 const otherCollections = collections.filter((c) => !c.isFavorite);
@@ -89,7 +65,7 @@ export function AppSidebar() {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {itemTypes.map((type) => {
-                    const Icon = typeIcons[type.icon] ?? Folder;
+                    const Icon = iconByName[type.icon] ?? Folder;
                     return (
                       <SidebarMenuItem key={type.id}>
                         <SidebarMenuButton render={<Link href={`/items/${type.slug}`} />}>

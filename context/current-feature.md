@@ -2,7 +2,7 @@
 
 <!-- Feature Name -->
 
-Dashboard UI Phase 2
+Dashboard UI Phase 3
 
 ## Status
 
@@ -14,15 +14,13 @@ Completed
 
 <!-- Goals & requirements -->
 
-Phase 2 of 3 for the dashboard UI layout. See @context/features/dashboard-phase-2-spec.md.
+Phase 3 of 3 for the dashboard UI layout. See @context/features/dashboard-phase-3-spec.md.
 
-- Collapsible sidebar
-- Items/types with links to /items/TYPE (eg. items/snippets)
-- Favorite collections
-- Most recent collections
-- User avatar area at the bottom
-- Drawer icon to open/close sidebar
-- Always a drawer on mobile view
+- The main area to the right
+- Recent collections
+- Pinned items
+- 10 recent items
+- 4 stats cards at the top for number of items, collections, favorite items and favorite collections (not in screenshot)
 
 ## Notes
 
@@ -36,7 +34,7 @@ References:
 - @context/project-overview.md
 - @src/lib/mock-data.ts
 - @context/features/dashboard-phase-1-spec.md
-- @context/features/dashboard-phase-3-spec.md
+- @context/features/dashboard-phase-2-spec.md
 
 ## History
 
@@ -46,3 +44,4 @@ References:
 - Initial Next.js and Tailwind setup
 - Dashboard UI Phase 1: ShadCN init, /dashboard route, shell layout (top bar + sidebar/main placeholders), dark mode default
 - Dashboard UI Phase 2: collapsible sidebar (shadcn) with type links, favorite/all collections, user footer, drawer toggle, mobile drawer
+- Dashboard UI Phase 3: main area with 4 stat cards, recent collections grid, pinned items, and recent items list
