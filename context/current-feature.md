@@ -2,7 +2,7 @@
 
 <!-- Feature Name -->
 
-Prisma + Neon PostgreSQL Setup
+Seed Data
 
 ## Status
 
@@ -14,26 +14,26 @@ Completed
 
 <!-- Goals & requirements -->
 
-Set up Prisma ORM with Neon PostgreSQL (serverless). See @context/features/database-spec.md.
+Create a seed script (`prisma/seed.ts`) to populate the database with sample data for development and demos. See @context/features/seed-spec.md.
 
-- Use Neon PostgreSQL (serverless)
-- Create initial schema based on data models in @context/project-overview.md (this will evolve)
-- Include NextAuth models (Account, Session, VerificationToken)
-- Add appropriate indexes and cascade deletes
+- Demo user (demo@devstash.io, password hashed with bcryptjs 12 rounds, isPro false, emailVerified set)
+- 7 system item types (snippet, prompt, command, note, file, image, link) with Lucide icon names + colors, isSystem true
+- 5 collections with items: React Patterns (3 snippets), AI Workflows (3 prompts), DevOps (1 snippet, 1 command, 2 links), Terminal Commands (4 commands), Design Resources (4 links)
+- Use real URLs for link items
 
 ## Notes
 
 <!-- Any extra notes -->
 
-- Use Prisma 7 (breaking changes) — read the upgrade guide before writing code: https://www.prisma.io/docs/orm/more/upgrade-guides/upgrading-versions/upgrading-to-prisma-7
-- Setup reference: https://www.prisma.io/docs/getting-started/prisma-orm/quickstart/prisma-postgres
-- Dev branch goes in DATABASE_URL, with a separate production branch. ALWAYS create migrations; never push directly unless specified.
+- Wire up the seed in prisma.config.ts (`migrations.seed`) so `prisma db seed` runs it via tsx.
+- Make the seed idempotent (upsert) so it can be re-run safely.
 
 References:
 
-- @context/features/database-spec.md
+- @context/features/seed-spec.md
 - @context/project-overview.md
 - @context/coding-standards.md
+- @prisma/schema.prisma
 
 ## History
 
@@ -45,3 +45,4 @@ References:
 - Dashboard UI Phase 2: collapsible sidebar (shadcn) with type links, favorite/all collections, user footer, drawer toggle, mobile drawer
 - Dashboard UI Phase 3: main area with 4 stat cards, recent collections grid, pinned items, and recent items list
 - Prisma + Neon PostgreSQL: Prisma 7 (new prisma-client generator + Neon driver adapter), full schema with NextAuth models, prisma.config.ts, client singleton, initial migration
+- Seed Data: emailVerified field + migration, bcryptjs, idempotent prisma/seed.ts (demo user, 7 system types, 5 collections, 18 items), wired into prisma.config.ts; test-db script displays seeded data
