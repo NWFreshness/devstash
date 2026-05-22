@@ -69,7 +69,7 @@ export function AppSidebar() {
                     return (
                       <SidebarMenuItem key={type.id}>
                         <SidebarMenuButton render={<Link href={`/items/${type.slug}`} />}>
-                          <Icon />
+                          <Icon style={{ color: type.color }} />
                           <span>{type.name}</span>
                         </SidebarMenuButton>
                         <SidebarMenuBadge>{type.count}</SidebarMenuBadge>
@@ -99,7 +99,7 @@ export function AppSidebar() {
                       {favoriteCollections.map((collection) => (
                         <SidebarMenuItem key={collection.id}>
                           <SidebarMenuButton>
-                            <Folder />
+                            <Folder style={{ color: collection.color }} />
                             <span>{collection.name}</span>
                           </SidebarMenuButton>
                           <SidebarMenuBadge>

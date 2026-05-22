@@ -12,10 +12,14 @@ import {
 
 export function CollectionCard({ collection }: { collection: Collection }) {
   return (
-    <Card size="sm" className="border-l-2 border-l-primary transition-colors hover:bg-muted/30">
+    <Card
+      size="sm"
+      className="border-l-2 transition-colors hover:bg-muted/30"
+      style={{ borderLeftColor: collection.color }}
+    >
       <CardHeader>
         <CardTitle className="flex min-w-0 items-center gap-2">
-          <Folder className="size-4 shrink-0 text-muted-foreground" />
+          <Folder className="size-4 shrink-0" style={{ color: collection.color }} />
           <span className="truncate">{collection.name}</span>
           {collection.isFavorite && (
             <Star className="size-3.5 shrink-0 fill-amber-400 text-amber-400" />

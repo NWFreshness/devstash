@@ -17,6 +17,7 @@ export interface ItemType {
   slug: string;
   icon: string; // lucide-react icon name
   count: number;
+  color: string; // hex accent color for the type
 }
 
 export interface Collection {
@@ -25,6 +26,7 @@ export interface Collection {
   description: string;
   itemCount: number;
   isFavorite: boolean;
+  color: string; // hex accent color for the collection
 }
 
 export interface Item {
@@ -49,13 +51,13 @@ export const currentUser: User = {
 };
 
 export const itemTypes: ItemType[] = [
-  { id: "type_snippet", name: "Snippets", slug: "snippet", icon: "Code", count: 24 },
-  { id: "type_prompt", name: "Prompts", slug: "prompt", icon: "MessageSquare", count: 18 },
-  { id: "type_command", name: "Commands", slug: "command", icon: "Terminal", count: 15 },
-  { id: "type_note", name: "Notes", slug: "note", icon: "FileText", count: 12 },
-  { id: "type_file", name: "Files", slug: "file", icon: "Paperclip", count: 5 },
-  { id: "type_image", name: "Images", slug: "image", icon: "Image", count: 3 },
-  { id: "type_link", name: "Links", slug: "link", icon: "Link", count: 8 },
+  { id: "type_snippet", name: "Snippets", slug: "snippet", icon: "Code", count: 24, color: "#2dd4bf" },
+  { id: "type_prompt", name: "Prompts", slug: "prompt", icon: "MessageSquare", count: 18, color: "#a78bfa" },
+  { id: "type_command", name: "Commands", slug: "command", icon: "Terminal", count: 15, color: "#fb923c" },
+  { id: "type_note", name: "Notes", slug: "note", icon: "FileText", count: 12, color: "#60a5fa" },
+  { id: "type_file", name: "Files", slug: "file", icon: "Paperclip", count: 5, color: "#f472b6" },
+  { id: "type_image", name: "Images", slug: "image", icon: "Image", count: 3, color: "#4ade80" },
+  { id: "type_link", name: "Links", slug: "link", icon: "Link", count: 8, color: "#38bdf8" },
 ];
 
 export const collections: Collection[] = [
@@ -65,6 +67,7 @@ export const collections: Collection[] = [
     description: "Common React patterns and hooks",
     itemCount: 12,
     isFavorite: true,
+    color: "#2dd4bf",
   },
   {
     id: "col_python",
@@ -72,6 +75,7 @@ export const collections: Collection[] = [
     description: "Useful Python code snippets",
     itemCount: 8,
     isFavorite: false,
+    color: "#4ade80",
   },
   {
     id: "col_context",
@@ -79,6 +83,7 @@ export const collections: Collection[] = [
     description: "AI context files for projects",
     itemCount: 5,
     isFavorite: true,
+    color: "#a78bfa",
   },
   {
     id: "col_interview",
@@ -86,6 +91,7 @@ export const collections: Collection[] = [
     description: "Technical interview preparation",
     itemCount: 24,
     isFavorite: false,
+    color: "#facc15",
   },
   {
     id: "col_git",
@@ -93,6 +99,7 @@ export const collections: Collection[] = [
     description: "Frequently used git commands",
     itemCount: 15,
     isFavorite: true,
+    color: "#fb923c",
   },
   {
     id: "col_ai",
@@ -100,6 +107,7 @@ export const collections: Collection[] = [
     description: "Curated AI prompts for coding",
     itemCount: 18,
     isFavorite: false,
+    color: "#60a5fa",
   },
 ];
 

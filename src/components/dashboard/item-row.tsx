@@ -2,7 +2,7 @@ import { Pin, Star } from "lucide-react";
 
 import type { Item } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
-import { typeIcon } from "@/components/dashboard/type-icons";
+import { typeColor, typeIcon } from "@/components/dashboard/type-icons";
 
 const MONTHS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -17,10 +17,14 @@ function formatDate(iso: string) {
 
 export function ItemRow({ item }: { item: Item }) {
   const Icon = typeIcon(item.typeSlug);
+  const color = typeColor(item.typeSlug);
   return (
-    <div className="flex items-start gap-3 rounded-lg p-3 ring-1 ring-foreground/10 transition-colors hover:bg-muted/50">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-        <Icon className="size-4" />
+    <div
+      className="flex items-start gap-3 rounded-lg border-l-2 p-3 ring-1 ring-foreground/10 transition-colors hover:bg-muted/50"
+      style={{ borderLeftColor: color }}
+    >
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
+        <Icon className="size-4" style={{ color }} />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">

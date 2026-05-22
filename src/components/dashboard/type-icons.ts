@@ -24,8 +24,14 @@ export const iconByName: Record<string, LucideIcon> = {
 };
 
 const iconNameBySlug = new Map(itemTypes.map((type) => [type.slug, type.icon]));
+const colorBySlug = new Map(itemTypes.map((type) => [type.slug, type.color]));
 
 /** Resolve a Lucide icon component from an item type slug. */
 export function typeIcon(slug: string): LucideIcon {
   return iconByName[iconNameBySlug.get(slug) ?? ""] ?? Folder;
+}
+
+/** Resolve the hex accent color for an item type slug. */
+export function typeColor(slug: string): string {
+  return colorBySlug.get(slug) ?? "var(--muted-foreground)";
 }
