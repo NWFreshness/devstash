@@ -19,6 +19,7 @@ model User {
   password String? // null for OAuth-only users
   name  String?
   image String?
+  emailVerified DateTime?
 
   // Billing
   isPro                Boolean   @default(false)
