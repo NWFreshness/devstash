@@ -2,7 +2,7 @@
 
 <!-- Feature Name -->
 
-Dashboard UI Phase 3
+Prisma + Neon PostgreSQL Setup
 
 ## Status
 
@@ -14,27 +14,26 @@ Completed
 
 <!-- Goals & requirements -->
 
-Phase 3 of 3 for the dashboard UI layout. See @context/features/dashboard-phase-3-spec.md.
+Set up Prisma ORM with Neon PostgreSQL (serverless). See @context/features/database-spec.md.
 
-- The main area to the right
-- Recent collections
-- Pinned items
-- 10 recent items
-- 4 stats cards at the top for number of items, collections, favorite items and favorite collections (not in screenshot)
+- Use Neon PostgreSQL (serverless)
+- Create initial schema based on data models in @context/project-overview.md (this will evolve)
+- Include NextAuth models (Account, Session, VerificationToken)
+- Add appropriate indexes and cascade deletes
 
 ## Notes
 
 <!-- Any extra notes -->
 
-Use mock data from @src/lib/mock-data.ts directly (import it) until the database is wired up.
+- Use Prisma 7 (breaking changes) — read the upgrade guide before writing code: https://www.prisma.io/docs/orm/more/upgrade-guides/upgrading-versions/upgrading-to-prisma-7
+- Setup reference: https://www.prisma.io/docs/getting-started/prisma-orm/quickstart/prisma-postgres
+- Dev branch goes in DATABASE_URL, with a separate production branch. ALWAYS create migrations; never push directly unless specified.
 
 References:
 
-- @context/screenshots/dashboard-ui-main.png
+- @context/features/database-spec.md
 - @context/project-overview.md
-- @src/lib/mock-data.ts
-- @context/features/dashboard-phase-1-spec.md
-- @context/features/dashboard-phase-2-spec.md
+- @context/coding-standards.md
 
 ## History
 
@@ -45,3 +44,4 @@ References:
 - Dashboard UI Phase 1: ShadCN init, /dashboard route, shell layout (top bar + sidebar/main placeholders), dark mode default
 - Dashboard UI Phase 2: collapsible sidebar (shadcn) with type links, favorite/all collections, user footer, drawer toggle, mobile drawer
 - Dashboard UI Phase 3: main area with 4 stat cards, recent collections grid, pinned items, and recent items list
+- Prisma + Neon PostgreSQL: Prisma 7 (new prisma-client generator + Neon driver adapter), full schema with NextAuth models, prisma.config.ts, client singleton, initial migration
