@@ -1,5 +1,6 @@
 import {
   Code,
+  File as FileIcon,
   FileText,
   Folder,
   Image as ImageIcon,
@@ -7,12 +8,14 @@ import {
   type LucideIcon,
   MessageSquare,
   Paperclip,
+  Sparkles,
+  StickyNote,
   Terminal,
 } from "lucide-react";
 
 import { itemTypes } from "@/lib/mock-data";
 
-/** Lucide component for each mock-data icon name. */
+/** Lucide component for each known icon name (mock-data + DB-seeded types). */
 export const iconByName: Record<string, LucideIcon> = {
   Code,
   MessageSquare,
@@ -21,6 +24,9 @@ export const iconByName: Record<string, LucideIcon> = {
   Paperclip,
   Image: ImageIcon,
   Link: LinkIcon,
+  Sparkles,
+  StickyNote,
+  File: FileIcon,
 };
 
 const iconNameBySlug = new Map(itemTypes.map((type) => [type.slug, type.icon]));
