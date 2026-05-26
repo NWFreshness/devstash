@@ -59,6 +59,72 @@ export async function getRecentItems(limit = 10): Promise<ItemWithMeta[]> {
   return items.map(shape);
 }
 
+export interface DashboardStats {
+  itemCount: number;
+  collectionCount: number;
+  favoriteItemCount: number;
+  favoriteCollectionCount: number;
+}
+
+export async function getDashboardStats(): Promise<DashboardStats> {
+  const userId = await getDemoUserId();
+  if (!userId) {
+    return { itemCount: 0, collectionCount: 0, favoriteItemCount: 0, favoriteCollectionCount: 0 };
+  }
+  const [itemCount, collectionCount, favoriteItemCount, favoriteCollectionCount] =
+    await Promise.all([
+      prisma.item.count({ where: { userId } }),
+      prisma.collection.count({ where: { userId } }),
+      prisma.item.count({ where: { userId, isFavorite: true } }),
+      prisma.collection.count({ where: { userId, isFavorite: true } }),
+    ]);
+  return { itemCount, collectionCount, favoriteItemCount, favoriteCollectionCount };
+}
+
+export interface ItemTypeWithCount {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
+  color: string | null;
+  count: number;
+}
+
+export async function getItemTypeCounts(): Promise<ItemTypeWithCount[]> {
+  const userId = await getDemoUserId();
+  const types = await prisma.itemType.findMany({
+    where: { isSystem: true },
+    orderBy: { name: "asc" },
+  });
+
+  if (!userId) {
+    return types.map((t) => ({
+      id: t.id,
+      name: t.name,
+      slug: t.slug,
+      icon: t.icon,
+      color: t.color,
+      count: 0,
+    }));
+  }
+
+  const grouped = await prisma.item.groupBy({
+    by: ["typeId"],
+    where: { userId },
+    _count: { _all: true },
+  });
+  const countByTypeId = new Map(grouped.map((g) => [g.typeId, g._count._all]));
+
+  return types.map((t) => ({
+    id: t.id,
+    name: t.name,
+    slug: t.slug,
+    icon: t.icon,
+    color: t.color,
+    count: countByTypeId.get(t.id) ?? 0,
+  }));
+}
+
 export async function getPinnedItems(): Promise<ItemWithMeta[]> {
   const userId = await getDemoUserId();
   if (!userId) return [];
