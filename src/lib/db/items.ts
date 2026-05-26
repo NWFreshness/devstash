@@ -90,11 +90,17 @@ export interface ItemTypeWithCount {
   count: number;
 }
 
+const SYSTEM_TYPE_ORDER = ["snippet", "prompt", "command", "note", "file", "image", "link"];
+
 export async function getItemTypeCounts(): Promise<ItemTypeWithCount[]> {
   const userId = await getDemoUserId();
   const types = await prisma.itemType.findMany({
     where: { isSystem: true },
-    orderBy: { name: "asc" },
+  });
+  types.sort((a, b) => {
+    const ai = SYSTEM_TYPE_ORDER.indexOf(a.slug);
+    const bi = SYSTEM_TYPE_ORDER.indexOf(b.slug);
+    return (ai === -1 ? Infinity : ai) - (bi === -1 ? Infinity : bi);
   });
 
   if (!userId) {
