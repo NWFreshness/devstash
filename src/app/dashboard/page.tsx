@@ -1,9 +1,11 @@
-import { collections, items } from "@/lib/mock-data";
+import { items } from "@/lib/mock-data";
+import { getRecentCollections } from "@/lib/db/collections";
 import { CollectionCard } from "@/components/dashboard/collection-card";
 import { ItemRow } from "@/components/dashboard/item-row";
 import { StatCards } from "@/components/dashboard/stat-cards";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const collections = await getRecentCollections(6);
   const recentItems = [...items]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 10);
