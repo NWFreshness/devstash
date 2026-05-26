@@ -1,23 +1,23 @@
-import { Pin, Star } from "lucide-react";
+import { Folder, Pin, Star } from "lucide-react";
 
-import type { Item } from "@/lib/mock-data";
+import type { ItemWithMeta } from "@/lib/db/items";
 import { Badge } from "@/components/ui/badge";
-import { typeColor, typeIcon } from "@/components/dashboard/type-icons";
+import { iconByName } from "@/components/dashboard/type-icons";
+
+const FALLBACK_COLOR = "var(--muted-foreground)";
 
 const MONTHS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
-/** Formats an ISO date (yyyy-mm-dd) as "Mon D" without timezone shifts. */
-function formatDate(iso: string) {
-  const [, month, day] = iso.split("-").map(Number);
-  return `${MONTHS[month - 1]} ${day}`;
+function formatDate(date: Date) {
+  return `${MONTHS[date.getMonth()]} ${date.getDate()}`;
 }
 
-export function ItemRow({ item }: { item: Item }) {
-  const Icon = typeIcon(item.typeSlug);
-  const color = typeColor(item.typeSlug);
+export function ItemRow({ item }: { item: ItemWithMeta }) {
+  const Icon = iconByName[item.type.icon ?? ""] ?? Folder;
+  const color = item.type.color ?? FALLBACK_COLOR;
   return (
     <div
       className="flex items-start gap-3 rounded-lg border-l-2 p-3 ring-1 ring-foreground/10 transition-colors hover:bg-muted/50"
@@ -36,18 +36,25 @@ export function ItemRow({ item }: { item: Item }) {
             <Star className="size-3.5 shrink-0 fill-amber-400 text-amber-400" />
           )}
         </div>
-        <p className="truncate text-sm text-muted-foreground">
-          {item.description}
-        </p>
-        {item.tags.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
-            {item.tags.map((tag) => (
-              <Badge key={tag} variant="secondary">
-                {tag}
-              </Badge>
-            ))}
-          </div>
+        {item.description && (
+          <p className="truncate text-sm text-muted-foreground">
+            {item.description}
+          </p>
         )}
+        <div className="mt-2 flex flex-wrap gap-1">
+          <Badge
+            variant="secondary"
+            style={{ color, borderColor: color }}
+            className="border bg-transparent"
+          >
+            {item.type.slug}
+          </Badge>
+          {item.tags.map((tag) => (
+            <Badge key={tag} variant="secondary">
+              {tag}
+            </Badge>
+          ))}
+        </div>
       </div>
       <time className="shrink-0 text-xs text-muted-foreground">
         {formatDate(item.createdAt)}

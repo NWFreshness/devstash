@@ -2,7 +2,7 @@
 
 <!-- Feature Name -->
 
-Dashboard Collections
+Dashboard Items
 
 ## Status
 
@@ -14,15 +14,14 @@ Completed
 
 <!-- Goals & requirements -->
 
-Replace the dummy collection data displayed in the main area of the dashboard (right side) with actual data from the database. It should look how it does now with the 6 cards of recent collections, but instead of using data from @src/lib/mock-data.ts, it should be from our Neon database using Prisma.
+Replace the dummy item data displayed in the main area of the dashboard (right side) with actual data from the database. This includes both pinned and recent items. It should look how it does now, but instead of using data from @src/lib/mock-data.ts, it should be from our Neon database using Prisma.
 
-Do not add the items underneath yet. We will do that later.
+If there are no pinned items, nothing should display there.
 
-- Create `src/lib/db/collections.ts` with data fetching functions
-- Fetch collections directly in server component
-- Collection card border color derived from most-used content type in that collection
-- Show small icons of all types in that collection
-- Keep the current design (reference `@context/screenshots/dashboard-ui-main.png` if needed)
+- Create `src/lib/db/items.ts` with data fetching functions
+- Fetch items directly in server component
+- Item card icon/border derived from the item type
+- Display item type tags and anything else currently there (reference `@context/screenshots/dashboard-ui-main.png` if needed)
 - Update collection stats display
 
 ## Notes
@@ -31,7 +30,7 @@ Do not add the items underneath yet. We will do that later.
 
 References:
 
-- @context/features/dashboard-collections-spec.md
+- @context/features/dashboard-items-spec.md
 - @context/project-overview.md
 - @context/coding-standards.md
 - @prisma/schema.prisma
@@ -49,3 +48,4 @@ References:
 - Prisma + Neon PostgreSQL: Prisma 7 (new prisma-client generator + Neon driver adapter), full schema with NextAuth models, prisma.config.ts, client singleton, initial migration
 - Seed Data: emailVerified field + migration, bcryptjs, idempotent prisma/seed.ts (demo user, 7 system types, 5 collections, 18 items), wired into prisma.config.ts; test-db script displays seeded data
 - Dashboard Collections: replaced mock collection grid with Prisma-backed data (src/lib/db/collections.ts), collection card border + folder color derived from most-used type, small icons for all types in collection, extended type-icons map for seeded icon names
+- Dashboard Items: replaced mock pinned + recent item lists with Prisma-backed data (src/lib/db/items.ts), item row icon/border derived from item type, type slug rendered as colored badge alongside tag badges, pinned section hidden when empty
