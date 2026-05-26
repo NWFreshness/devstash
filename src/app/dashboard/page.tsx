@@ -1,15 +1,15 @@
-import { items } from "@/lib/mock-data";
 import { getRecentCollections } from "@/lib/db/collections";
+import { getPinnedItems, getRecentItems } from "@/lib/db/items";
 import { CollectionCard } from "@/components/dashboard/collection-card";
 import { ItemRow } from "@/components/dashboard/item-row";
 import { StatCards } from "@/components/dashboard/stat-cards";
 
 export default async function DashboardPage() {
-  const collections = await getRecentCollections(6);
-  const recentItems = [...items]
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, 10);
-  const pinnedItems = items.filter((item) => item.isPinned);
+  const [collections, pinnedItems, recentItems] = await Promise.all([
+    getRecentCollections(6),
+    getPinnedItems(),
+    getRecentItems(10),
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
