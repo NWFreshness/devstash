@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Box, ChevronDown, Folder, Settings, Star } from "lucide-react";
+import { Box, ChevronDown, Folder, FolderOpen, Settings, Star } from "lucide-react";
 
-import { collections, currentUser, itemTypes } from "@/lib/mock-data";
+import { currentUser } from "@/lib/mock-data";
+import type { ItemTypeWithCount } from "@/lib/db/items";
+import type { SidebarCollections } from "@/lib/db/collections";
 import { iconByName } from "@/components/dashboard/type-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -26,8 +28,10 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-const favoriteCollections = collections.filter((c) => c.isFavorite);
-const otherCollections = collections.filter((c) => !c.isFavorite);
+interface AppSidebarProps {
+  itemTypes: ItemTypeWithCount[];
+  collections: SidebarCollections;
+}
 
 function initials(name: string) {
   return name
@@ -42,7 +46,8 @@ const chevron = (
   <ChevronDown className="ml-auto -rotate-90 transition-transform group-data-[panel-open]/clp:rotate-0" />
 );
 
-export function AppSidebar() {
+export function AppSidebar({ itemTypes, collections }: AppSidebarProps) {
+  const { favorites, recents } = collections;
   return (
     <Sidebar>
       <SidebarHeader>
@@ -65,12 +70,12 @@ export function AppSidebar() {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {itemTypes.map((type) => {
-                    const Icon = iconByName[type.icon] ?? Folder;
+                    const Icon = iconByName[type.icon ?? ""] ?? Folder;
                     return (
                       <SidebarMenuItem key={type.id}>
                         <SidebarMenuButton render={<Link href={`/items/${type.slug}`} />}>
-                          <Icon style={{ color: type.color }} />
-                          <span>{type.name}</span>
+                          <Icon style={{ color: type.color ?? undefined }} />
+                          <span className="capitalize">{type.name}</span>
                         </SidebarMenuButton>
                         <SidebarMenuBadge>{type.count}</SidebarMenuBadge>
                       </SidebarMenuItem>
@@ -90,16 +95,18 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <CollapsibleContent>
               <SidebarGroupContent>
-                {favoriteCollections.length > 0 && (
+                {favorites.length > 0 && (
                   <>
                     <div className="px-2 pt-1 pb-1 text-[0.7rem] font-medium tracking-wide text-sidebar-foreground/50">
                       Favorites
                     </div>
                     <SidebarMenu>
-                      {favoriteCollections.map((collection) => (
+                      {favorites.map((collection) => (
                         <SidebarMenuItem key={collection.id}>
                           <SidebarMenuButton>
-                            <Folder style={{ color: collection.color }} />
+                            <Folder
+                              style={{ color: collection.primaryColor ?? undefined }}
+                            />
                             <span>{collection.name}</span>
                           </SidebarMenuButton>
                           <SidebarMenuBadge>
@@ -110,19 +117,41 @@ export function AppSidebar() {
                     </SidebarMenu>
                   </>
                 )}
-                <div className="px-2 pt-3 pb-1 text-[0.7rem] font-medium tracking-wide text-sidebar-foreground/50">
-                  All Collections
-                </div>
-                <SidebarMenu>
-                  {otherCollections.map((collection) => (
-                    <SidebarMenuItem key={collection.id}>
-                      <SidebarMenuButton>
-                        <Folder />
-                        <span>{collection.name}</span>
-                      </SidebarMenuButton>
-                      <SidebarMenuBadge>{collection.itemCount}</SidebarMenuBadge>
-                    </SidebarMenuItem>
-                  ))}
+                {recents.length > 0 && (
+                  <>
+                    <div className="px-2 pt-3 pb-1 text-[0.7rem] font-medium tracking-wide text-sidebar-foreground/50">
+                      Recents
+                    </div>
+                    <SidebarMenu>
+                      {recents.map((collection) => (
+                        <SidebarMenuItem key={collection.id}>
+                          <SidebarMenuButton>
+                            <span
+                              aria-hidden
+                              className="inline-block size-2.5 shrink-0 rounded-full"
+                              style={{
+                                backgroundColor:
+                                  collection.primaryColor ?? "var(--muted-foreground)",
+                              }}
+                            />
+                            <span>{collection.name}</span>
+                          </SidebarMenuButton>
+                          <SidebarMenuBadge>{collection.itemCount}</SidebarMenuBadge>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </>
+                )}
+                <SidebarMenu className="mt-2">
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      render={<Link href="/collections" />}
+                      className="text-sidebar-foreground/70"
+                    >
+                      <FolderOpen />
+                      <span>View all collections</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </CollapsibleContent>
