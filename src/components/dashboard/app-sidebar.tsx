@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { Box, ChevronDown, Folder, FolderOpen, Settings, Star } from "lucide-react";
 
-import { currentUser } from "@/lib/mock-data";
 import type { ItemTypeWithCount } from "@/lib/db/items";
 import type { SidebarCollections } from "@/lib/db/collections";
+import type { DemoUser } from "@/lib/db/user";
 import { iconByName } from "@/components/dashboard/type-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/sidebar";
 
 interface AppSidebarProps {
+  user: DemoUser | null;
   itemTypes: ItemTypeWithCount[];
   collections: SidebarCollections;
 }
@@ -49,8 +50,9 @@ const chevron = (
   <ChevronDown className="ml-auto -rotate-90 transition-transform group-data-[panel-open]/clp:rotate-0" />
 );
 
-export function AppSidebar({ itemTypes, collections }: AppSidebarProps) {
+export function AppSidebar({ user, itemTypes, collections }: AppSidebarProps) {
   const { favorites, recents } = collections;
+  const displayName = user?.name ?? user?.email ?? "";
   return (
     <Sidebar>
       <SidebarHeader>
@@ -173,15 +175,13 @@ export function AppSidebar({ itemTypes, collections }: AppSidebarProps) {
       <SidebarFooter>
         <div className="flex items-center gap-2 px-1 py-1.5">
           <Avatar>
-            {currentUser.image && (
-              <AvatarImage src={currentUser.image} alt={currentUser.name} />
-            )}
-            <AvatarFallback>{initials(currentUser.name)}</AvatarFallback>
+            {user?.image && <AvatarImage src={user.image} alt={displayName} />}
+            <AvatarFallback>{displayName ? initials(displayName) : "?"}</AvatarFallback>
           </Avatar>
           <div className="grid flex-1 text-left leading-tight">
-            <span className="truncate text-sm font-medium">{currentUser.name}</span>
+            <span className="truncate text-sm font-medium">{displayName}</span>
             <span className="truncate text-xs text-muted-foreground">
-              {currentUser.email}
+              {user?.email}
             </span>
           </div>
           <Button variant="ghost" size="icon-sm" aria-label="Settings">

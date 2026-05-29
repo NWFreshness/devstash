@@ -3,8 +3,8 @@ import { Files, FolderHeart, FolderOpen, Star } from "lucide-react";
 import { getDashboardStats } from "@/lib/db/items";
 import { Card, CardContent } from "@/components/ui/card";
 
-export async function StatCards() {
-  const stats = await getDashboardStats();
+export async function StatCards({ userId }: { userId: string | null }) {
+  const stats = await getDashboardStats(userId);
   const cards = [
     { label: "Items", value: stats.itemCount, icon: Files },
     { label: "Collections", value: stats.collectionCount, icon: FolderOpen },

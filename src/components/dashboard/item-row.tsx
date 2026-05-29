@@ -12,7 +12,7 @@ const MONTHS = [
 ];
 
 function formatDate(date: Date) {
-  return `${MONTHS[date.getMonth()]} ${date.getDate()}`;
+  return `${MONTHS[date.getUTCMonth()]} ${date.getUTCDate()}`;
 }
 
 export function ItemRow({ item }: { item: ItemWithMeta }) {

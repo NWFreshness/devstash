@@ -1,7 +1,5 @@
 import { prisma } from "@/lib/prisma";
 
-const DEMO_EMAIL = "demo@devstash.io";
-
 export interface ItemWithMeta {
   id: string;
   title: string;
@@ -11,14 +9,6 @@ export interface ItemWithMeta {
   createdAt: Date;
   type: { slug: string; icon: string | null; color: string | null };
   tags: string[];
-}
-
-async function getDemoUserId(): Promise<string | null> {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_EMAIL },
-    select: { id: true },
-  });
-  return user?.id ?? null;
 }
 
 function shape(item: {
@@ -43,8 +33,10 @@ function shape(item: {
   };
 }
 
-export async function getRecentItems(limit = 10): Promise<ItemWithMeta[]> {
-  const userId = await getDemoUserId();
+export async function getRecentItems(
+  userId: string | null,
+  limit = 10,
+): Promise<ItemWithMeta[]> {
   if (!userId) return [];
 
   const items = await prisma.item.findMany({
@@ -66,8 +58,9 @@ export interface DashboardStats {
   favoriteCollectionCount: number;
 }
 
-export async function getDashboardStats(): Promise<DashboardStats> {
-  const userId = await getDemoUserId();
+export async function getDashboardStats(
+  userId: string | null,
+): Promise<DashboardStats> {
   if (!userId) {
     return { itemCount: 0, collectionCount: 0, favoriteItemCount: 0, favoriteCollectionCount: 0 };
   }
@@ -92,8 +85,9 @@ export interface ItemTypeWithCount {
 
 const SYSTEM_TYPE_ORDER = ["snippet", "prompt", "command", "note", "file", "image", "link"];
 
-export async function getItemTypeCounts(): Promise<ItemTypeWithCount[]> {
-  const userId = await getDemoUserId();
+export async function getItemTypeCounts(
+  userId: string | null,
+): Promise<ItemTypeWithCount[]> {
   const types = await prisma.itemType.findMany({
     where: { isSystem: true },
   });
@@ -131,8 +125,9 @@ export async function getItemTypeCounts(): Promise<ItemTypeWithCount[]> {
   }));
 }
 
-export async function getPinnedItems(): Promise<ItemWithMeta[]> {
-  const userId = await getDemoUserId();
+export async function getPinnedItems(
+  userId: string | null,
+): Promise<ItemWithMeta[]> {
   if (!userId) return [];
 
   const items = await prisma.item.findMany({

@@ -1,14 +1,17 @@
 import { getRecentCollections } from "@/lib/db/collections";
 import { getPinnedItems, getRecentItems } from "@/lib/db/items";
+import { getDemoUser } from "@/lib/db/user";
 import { CollectionCard } from "@/components/dashboard/collection-card";
 import { ItemRow } from "@/components/dashboard/item-row";
 import { StatCards } from "@/components/dashboard/stat-cards";
 
 export default async function DashboardPage() {
+  const user = await getDemoUser();
+  const userId = user?.id ?? null;
   const [collections, pinnedItems, recentItems] = await Promise.all([
-    getRecentCollections(6),
-    getPinnedItems(),
-    getRecentItems(10),
+    getRecentCollections(userId, 6),
+    getPinnedItems(userId),
+    getRecentItems(userId, 10),
   ]);
 
   return (
@@ -18,7 +21,7 @@ export default async function DashboardPage() {
         <p className="text-muted-foreground">Your developer knowledge hub</p>
       </div>
 
-      <StatCards />
+      <StatCards userId={userId} />
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Recent Collections</h2>

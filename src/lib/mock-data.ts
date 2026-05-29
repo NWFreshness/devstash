@@ -1,16 +1,8 @@
 /**
- * Mock data still used by the dashboard sidebar (current user + item type
- * icons/colors). Most data is now DB-backed via src/lib/db; these remain until
- * the user/session and type styling are sourced from elsewhere.
+ * Mock data still used by the dashboard sidebar (item type icons/colors). Most
+ * data is now DB-backed via src/lib/db; these remain until type styling is
+ * sourced from elsewhere.
  */
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  image: string | null;
-  isPro: boolean;
-}
 
 export interface ItemType {
   id: string;
@@ -20,14 +12,6 @@ export interface ItemType {
   count: number;
   color: string; // hex accent color for the type
 }
-
-export const currentUser: User = {
-  id: "user_1",
-  name: "John Doe",
-  email: "john@example.com",
-  image: null,
-  isPro: true,
-};
 
 export const itemTypes: ItemType[] = [
   { id: "type_snippet", name: "Snippets", slug: "snippet", icon: "Code", count: 24, color: "#2dd4bf" },
