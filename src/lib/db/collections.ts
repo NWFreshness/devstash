@@ -1,7 +1,5 @@
 import { prisma } from "@/lib/prisma";
 
-const DEMO_EMAIL = "demo@devstash.io";
-
 export interface CollectionTypeMeta {
   slug: string;
   icon: string | null;
@@ -33,12 +31,14 @@ export interface SidebarCollections {
   recents: SidebarCollection[];
 }
 
-export async function getSidebarCollections(recentLimit = 8): Promise<SidebarCollections> {
-  const user = await prisma.user.findUnique({ where: { email: DEMO_EMAIL } });
-  if (!user) return { favorites: [], recents: [] };
+export async function getSidebarCollections(
+  userId: string | null,
+  recentLimit = 8,
+): Promise<SidebarCollections> {
+  if (!userId) return { favorites: [], recents: [] };
 
   const cols = await prisma.collection.findMany({
-    where: { userId: user.id },
+    where: { userId },
     orderBy: { updatedAt: "desc" },
     include: {
       items: {
@@ -76,12 +76,14 @@ export async function getSidebarCollections(recentLimit = 8): Promise<SidebarCol
   };
 }
 
-export async function getRecentCollections(limit = 6): Promise<CollectionWithMeta[]> {
-  const user = await prisma.user.findUnique({ where: { email: DEMO_EMAIL } });
-  if (!user) return [];
+export async function getRecentCollections(
+  userId: string | null,
+  limit = 6,
+): Promise<CollectionWithMeta[]> {
+  if (!userId) return [];
 
   const cols = await prisma.collection.findMany({
-    where: { userId: user.id },
+    where: { userId },
     orderBy: { updatedAt: "desc" },
     take: limit,
     include: {
