@@ -1,28 +1,24 @@
-# Current Feature
+# Current Feature: Add Pro Badge to Sidebar
 
 <!-- Feature Name -->
 
-Stats & Sidebar
+Add Pro Badge to Sidebar
 
 ## Status
 
 <!-- Not Started|In Progress|Completed -->
 
-Completed
+In Progress
 
 ## Goals
 
 <!-- Goals & requirements -->
 
-Show the stats in the main area from the data in the database instead of the @src/lib/mock-data.ts file.
+Add a "PRO" badge to the File and Image item types in the sidebar.
 
-Show the system item types in the sidebar and the actual collection data from the database.
-
-- Display stats pertaining to database data, keeping the current design/layout
-- Display item types in sidebar with their icons, linking to `/items/[typename]`
-- Add "View all collections" link under the collections list that goes to `/collections`
-- Keep the star icons for favorite collections, but for recents each collection should show a colored circle based on the most-used item type in that collection
-- Add database functions for stats and item types/sidebar collections (note: `src/lib/db/items.ts` already exists from the previous feature — extend it / add `src/lib/db/stats.ts` and `src/lib/db/item-types.ts` as needed; use `@src/lib/db/collections.ts` as reference)
+- Use the ShadCN UI badge component
+- Make the badge clean and subtle
+- Make "PRO" all uppercase
 
 ## Notes
 
@@ -30,13 +26,9 @@ Show the system item types in the sidebar and the actual collection data from th
 
 References:
 
-- @context/features/stats-sidebar-spec.md
-- @src/lib/db/collections.ts
-- @src/lib/db/items.ts
+- @context/features/add-pro-badge-sidebar.md
 - @context/project-overview.md
 - @context/coding-standards.md
-- @prisma/schema.prisma
-- @src/lib/mock-data.ts
 
 ## History
 

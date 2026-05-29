@@ -8,6 +8,7 @@ import type { ItemTypeWithCount } from "@/lib/db/items";
 import type { SidebarCollections } from "@/lib/db/collections";
 import { iconByName } from "@/components/dashboard/type-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -32,6 +33,8 @@ interface AppSidebarProps {
   itemTypes: ItemTypeWithCount[];
   collections: SidebarCollections;
 }
+
+const PRO_TYPE_SLUGS = new Set(["file", "image"]);
 
 function initials(name: string) {
   return name
@@ -76,6 +79,14 @@ export function AppSidebar({ itemTypes, collections }: AppSidebarProps) {
                         <SidebarMenuButton render={<Link href={`/items/${type.slug}`} />}>
                           <Icon style={{ color: type.color ?? undefined }} />
                           <span className="capitalize">{type.name}</span>
+                          {PRO_TYPE_SLUGS.has(type.slug) && (
+                            <Badge
+                              variant="secondary"
+                              className="h-4 px-1.5 text-[0.6rem] font-semibold tracking-wide text-muted-foreground"
+                            >
+                              PRO
+                            </Badge>
+                          )}
                         </SidebarMenuButton>
                         <SidebarMenuBadge>{type.count}</SidebarMenuBadge>
                       </SidebarMenuItem>

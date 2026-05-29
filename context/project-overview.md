@@ -504,6 +504,12 @@ flowchart TD
 
 ## 🎨 UI / UX
 
+> **Reference screenshots:** Use the dashboard mockups below as a base for the
+> dashboard UI. It does not have to be exact — treat them as references.
+>
+> - `context/screenshots/dashboard-ui-main.png` — main dashboard (sidebar, collections grid, pinned items)
+> - `context/screenshots/dashboard-ui-drawer.png` — item detail drawer (content, tags, metadata)
+
 **Design principles:**
 
 - 🌙 **Dark mode first**, light as an option

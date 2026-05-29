@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__plugin_playwright_playwright__browser_close",
+      "Bash(rm -f dashboard-phase-1.png)",
+      "Bash(rm -rf .playwright-mcp)",
+      "Bash(git add *)",
+      "Bash(git commit -m '@ *)",
+      "Bash(printf '%s\\\\n' 'feat: dashboard UI phase 1 shell' '' 'Initialize ShadCN \\(base-nova / Base UI, Lucide, neutral\\) and scaffold the' '/dashboard route with a shell layout: display-only top bar \\(search + New' 'Collection / New Item\\) and placeholder sidebar/main regions. Dark mode on' 'by default.')",
+      "Bash(git commit *)",
+      "Bash(rm -f .git/COMMIT_EDIT_MSG_TMP)",
+      "Bash(git switch *)",
+      "Bash(git merge *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "Bash(npx --yes shadcn@latest add sidebar avatar collapsible --yes)",
+      "Bash(npm run *)",
+      "mcp__plugin_playwright_playwright__browser_resize",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "mcp__plugin_playwright_playwright__browser_console_messages",
+      "Bash(npm start *)",
+      "Bash(grep -q \"Ready\\\\|started server\\\\|Local:\" \"C:/Users/TYLER~1.MAY/AppData/Local/Temp/claude/c--External-Drive-devstash/db0278c3-0abf-46fa-a955-b88c7f251319/tasks/b301vfpik.output\")",
+      "Bash(break)",
+      "mcp__plugin_playwright_playwright__browser_click"
+    ]
+  }
+}
