@@ -287,7 +287,7 @@ model ItemTag {
 
 | Category | Choice | Why |
 |---|---|---|
-| Framework | [Next.js 15](https://nextjs.org/) (App Router, React 19) | Full-stack, RSC, fast iteration |
+| Framework | [Next.js 16](https://nextjs.org/) (App Router, React 19) | Full-stack, RSC, fast iteration |
 | Language | [TypeScript](https://www.typescriptlang.org/) | Type safety end-to-end |
 | Database | [Neon Postgres](https://neon.tech/) + [Prisma ORM](https://www.prisma.io/) | Serverless Postgres + great DX |
 | Caching | [Redis](https://redis.io/) (Upstash, optional) | Search + rate limiting |
