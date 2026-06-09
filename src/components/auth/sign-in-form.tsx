@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,10 +31,16 @@ function GithubMark() {
   );
 }
 
-export function SignInForm({ callbackUrl }: { callbackUrl: string }) {
+export function SignInForm({ callbackUrl, registered }: { callbackUrl: string; registered?: boolean }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (registered) {
+      toast.success("Account created! You can now sign in.");
+    }
+  }, [registered]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

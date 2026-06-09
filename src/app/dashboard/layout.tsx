@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { getSidebarCollections } from "@/lib/db/collections";
 import { getItemTypeCounts } from "@/lib/db/items";
 import { getDemoUser } from "@/lib/db/user";
+import { prisma } from "@/lib/prisma";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export const dynamic = "force-dynamic";
@@ -13,19 +14,27 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Footer shows the authenticated user; data queries still use the demo user
-  // (seeded data is owned by the demo user — per-user data is out of scope here).
+  // Sidebar footer shows the authenticated user fetched fresh from DB.
+  // Item counts and collections still use the demo user's seeded data.
   const [session, demoUser] = await Promise.all([auth(), getDemoUser()]);
-  const userId = demoUser?.id ?? null;
-  const [itemTypes, collections] = await Promise.all([
-    getItemTypeCounts(userId),
-    getSidebarCollections(userId),
+  const sessionUserId = session?.user?.id;
+  const demoUserId = demoUser?.id ?? null;
+
+  const [authUser, itemTypes, collections] = await Promise.all([
+    sessionUserId
+      ? prisma.user.findUnique({
+          where: { id: sessionUserId },
+          select: { name: true, email: true, image: true },
+        })
+      : null,
+    getItemTypeCounts(demoUserId),
+    getSidebarCollections(demoUserId),
   ]);
 
   return (
     <SidebarProvider>
       <AppSidebar
-        user={session?.user ?? null}
+        user={authUser ?? session?.user ?? null}
         itemTypes={itemTypes}
         collections={collections}
       />

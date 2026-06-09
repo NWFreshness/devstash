@@ -45,7 +45,7 @@ export function RegisterForm() {
       setError(data.error ?? "Something went wrong.");
       return;
     }
-    router.push("/sign-in");
+    router.push("/sign-in?registered=true");
   }
 
   return (
