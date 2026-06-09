@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { TopBar } from "@/components/dashboard/top-bar";
+import { auth } from "@/auth";
 import { getSidebarCollections } from "@/lib/db/collections";
 import { getItemTypeCounts } from "@/lib/db/items";
 import { getDemoUser } from "@/lib/db/user";
@@ -12,8 +13,10 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getDemoUser();
-  const userId = user?.id ?? null;
+  // Footer shows the authenticated user; data queries still use the demo user
+  // (seeded data is owned by the demo user — per-user data is out of scope here).
+  const [session, demoUser] = await Promise.all([auth(), getDemoUser()]);
+  const userId = demoUser?.id ?? null;
   const [itemTypes, collections] = await Promise.all([
     getItemTypeCounts(userId),
     getSidebarCollections(userId),
@@ -21,7 +24,11 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <AppSidebar user={user} itemTypes={itemTypes} collections={collections} />
+      <AppSidebar
+        user={session?.user ?? null}
+        itemTypes={itemTypes}
+        collections={collections}
+      />
       <SidebarInset>
         <TopBar />
         <div className="flex-1 overflow-auto p-6">{children}</div>

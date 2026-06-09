@@ -7,15 +7,16 @@ import { authConfig } from "@/auth.config";
 // session from the cookie without touching the database.
 const { auth } = NextAuth(authConfig);
 
-// Protect /dashboard/* — unauthenticated users go to NextAuth's default sign-in.
+// Protect /dashboard/* and /profile — unauthenticated users go to the custom
+// sign-in page with a callbackUrl so they return after signing in.
 export const proxy = auth((req) => {
   if (!req.auth) {
-    const signInUrl = new URL("/api/auth/signin", req.nextUrl.origin);
+    const signInUrl = new URL("/sign-in", req.nextUrl.origin);
     signInUrl.searchParams.set("callbackUrl", req.nextUrl.href);
     return NextResponse.redirect(signInUrl);
   }
 });
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/profile"],
 };
