@@ -1,13 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { Box, ChevronDown, Folder, FolderOpen, Settings, Star } from "lucide-react";
+import { signOut } from "next-auth/react";
+import {
+  Box,
+  ChevronDown,
+  Folder,
+  FolderOpen,
+  LogOut,
+  Settings,
+  Star,
+  User,
+} from "lucide-react";
 
 import type { ItemTypeWithCount } from "@/lib/db/items";
 import type { SidebarCollections } from "@/lib/db/collections";
-import type { DemoUser } from "@/lib/db/user";
 import { iconByName } from "@/components/dashboard/type-icons";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +24,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -29,22 +44,19 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
+interface SidebarUser {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
 interface AppSidebarProps {
-  user: DemoUser | null;
+  user: SidebarUser | null;
   itemTypes: ItemTypeWithCount[];
   collections: SidebarCollections;
 }
 
 const PRO_TYPE_SLUGS = new Set(["file", "image"]);
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 const chevron = (
   <ChevronDown className="ml-auto -rotate-90 transition-transform group-data-[panel-open]/clp:rotate-0" />
@@ -174,19 +186,40 @@ export function AppSidebar({ user, itemTypes, collections }: AppSidebarProps) {
 
       <SidebarFooter>
         <div className="flex items-center gap-2 px-1 py-1.5">
-          <Avatar>
-            {user?.image && <AvatarImage src={user.image} alt={displayName} />}
-            <AvatarFallback>{displayName ? initials(displayName) : "?"}</AvatarFallback>
-          </Avatar>
-          <div className="grid flex-1 text-left leading-tight">
-            <span className="truncate text-sm font-medium">{displayName}</span>
-            <span className="truncate text-xs text-muted-foreground">
-              {user?.email}
-            </span>
-          </div>
-          <Button variant="ghost" size="icon-sm" aria-label="Settings">
-            <Settings />
-          </Button>
+          <Link
+            href="/profile"
+            className="flex flex-1 items-center gap-2 overflow-hidden rounded-md p-1 hover:bg-sidebar-accent"
+          >
+            <UserAvatar name={displayName} image={user?.image} />
+            <div className="grid flex-1 text-left leading-tight">
+              <span className="truncate text-sm font-medium">{displayName}</span>
+              <span className="truncate text-xs text-muted-foreground">
+                {user?.email}
+              </span>
+            </div>
+          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="ghost" size="icon-sm" aria-label="Account menu">
+                  <Settings />
+                </Button>
+              }
+            />
+            <DropdownMenuContent side="top" align="end">
+              <DropdownMenuItem render={<Link href="/profile" />}>
+                <User />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => signOut({ redirectTo: "/sign-in" })}
+              >
+                <LogOut />
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </SidebarFooter>
     </Sidebar>

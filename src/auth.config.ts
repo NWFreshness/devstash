@@ -10,6 +10,9 @@ import type { NextAuthConfig } from "next-auth";
 // this file stays edge-safe (no bcrypt or Prisma imports). auth.ts overrides it
 // with the real bcrypt validation logic.
 export const authConfig = {
+  pages: {
+    signIn: "/sign-in",
+  },
   providers: [
     GitHub,
     Credentials({
