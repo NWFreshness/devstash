@@ -25,18 +25,22 @@ export async function POST(req: NextRequest) {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await prisma.user.create({
-    data: { name, email, password: hashedPassword },
-  });
-
   const token = crypto.randomUUID();
   const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  await prisma.verificationToken.create({
-    data: { identifier: email, token, expires },
-  });
+
+  const [user] = await prisma.$transaction([
+    prisma.user.create({
+      data: { name, email, password: hashedPassword },
+    }),
+    prisma.verificationToken.create({
+      data: { identifier: email, token, expires },
+    }),
+  ]);
 
   const origin = new URL(req.url).origin;
-  await sendVerificationEmail(email, token, origin);
+  await sendVerificationEmail(email, token, origin).catch(() => {
+    // Token is in the DB — user can request a resend from /verify-email
+  });
 
   return NextResponse.json(
     { success: true, user: { id: user.id, email: user.email } },
