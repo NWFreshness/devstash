@@ -114,7 +114,7 @@ export function SignInForm({
         type="button"
         variant="outline"
         className="w-full"
-        onClick={() => signIn("github", { redirectTo: callbackUrl })}
+        onClick={() => signIn("github", { redirectTo: safeRelative(callbackUrl) })}
       >
         <GithubMark />
         Sign in with GitHub

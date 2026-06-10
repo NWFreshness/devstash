@@ -10,23 +10,23 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL("/sign-in?error=invalid-token", origin));
   }
 
-  const record = await prisma.verificationToken.findUnique({
-    where: { identifier_token: { identifier: email, token } },
-  });
+  let record;
+  try {
+    record = await prisma.verificationToken.delete({
+      where: { identifier_token: { identifier: email, token } },
+    });
+  } catch {
+    return NextResponse.redirect(new URL("/sign-in?error=invalid-token", origin));
+  }
 
-  if (!record || record.expires < new Date()) {
+  if (record.expires < new Date()) {
     return NextResponse.redirect(new URL("/sign-in?error=token-expired", origin));
   }
 
-  await prisma.$transaction([
-    prisma.user.update({
-      where: { email },
-      data: { emailVerified: new Date() },
-    }),
-    prisma.verificationToken.delete({
-      where: { identifier_token: { identifier: email, token } },
-    }),
-  ]);
+  await prisma.user.update({
+    where: { email },
+    data: { emailVerified: new Date() },
+  });
 
   return NextResponse.redirect(new URL("/sign-in?verified=true", origin));
 }
