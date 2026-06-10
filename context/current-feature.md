@@ -1,24 +1,12 @@
-# Current Feature: Profile Page
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Display user info: email, name, avatar (GitHub or initials), account creation date
-- Show usage stats: total items, total collections, breakdown by item type (snippet, prompt, note, command, url, file, image)
-- Change password form — email/password users only (hidden for GitHub OAuth users)
-- Delete account with confirmation dialog
-- Route protected by existing auth middleware
-
 ## Notes
-
-- Avatar: use GitHub image if available, fall back to initials from name/email (reuse `UserAvatar` component already in codebase)
-- Change password: only visible when the authenticated user has a `password` field set (i.e. not OAuth-only)
-- Delete account: show a shadcn AlertDialog for confirmation before calling delete API
-- Item type breakdown counts come from DB, scoped to the authenticated user
-- Follow existing data-fetching pattern: server component resolves session via `auth()`, passes user to helpers
 
 ## History
 
@@ -42,3 +30,4 @@ In Progress
 - Email Verification on Register: JWT flag + middleware gate approach. New `src/lib/email.ts` (Resend SDK wrapper); `emailVerified` added to JWT/session types and callbacks in `auth.ts` and `auth.config.ts`; `proxy.ts` gains a second gate redirecting unverified users to `/verify-email`. New API routes: `GET /api/auth/verify-email` (atomic token delete + user update, redirects to `/sign-in?verified=true`), `POST /api/auth/resend-verification` (replaces token, sends new email, no user enumeration). Register route wraps user + token creation in a single `$transaction`. New `/verify-email` page with email pre-fill from query param and resend form. Sign-in shows `?verified=true` toast via Sonner. Register form redirects to `/verify-email` on success. GitHub OAuth users are auto-verified via PrismaAdapter. Tokens are single-use (delete-first atomicity) and expire after 24h. Security fixes: atomic token claim prevents TOCTOU race; GitHub OAuth `redirectTo` sanitized with `safeRelative`. Build passes; all flows verified in browser.
 - Email Verification Toggle: `EMAIL_VERIFICATION_ENABLED` env var (default `true`). New `src/lib/flags.ts` exports the flag for server-side use. Register route branches on the flag — when off, creates user with `emailVerified` pre-set and skips token/email; when on, existing `$transaction` path unchanged. `proxy.ts` reads the flag directly from `process.env` (Edge-safe) and skips the `/verify-email` redirect gate when off. Documented in `.env.example`. Build passes.
 - Forgot Password: "Forgot password?" link on sign-in page (next to Password label) → `/forgot-password`. `POST /api/auth/forgot-password` generates a reset token in `VerificationToken` (identifier `"reset:<email>"`), sends link via Resend, always returns success (no user enumeration). `POST /api/auth/reset-password` atomically deletes the token, validates expiry (1 hour), bcrypt-hashes and saves the new password. New pages `/forgot-password` and `/reset-password` in the `(auth)` route group; `/reset-password` without a token shows an invalid-link state. Sign-in shows `?reset=true` toast on success. No migration — reuses existing `VerificationToken` model. Build passes; all flows verified in browser.
+- Profile Page: `/profile` server component fetching user from DB (not session cache). User info card (avatar initials or GitHub image, name, email, member-since date). Usage stats card (total items, total collections, per-type breakdown across 7 system types). Change password form — visible only when `user.password` is set (hidden for GitHub OAuth users); validates current password server-side, bcrypt-hashes new password. Delete account — AlertDialog confirmation, `DELETE /api/profile` cascade-deletes user + all data, then client calls `signOut`. New helpers: `src/lib/db/profile.ts` (getProfileUser, getProfileStats). New API routes: `POST /api/profile/change-password`, `DELETE /api/profile`. Added `alert-dialog` shadcn component. Build passes; all flows verified in browser.
