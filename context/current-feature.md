@@ -1,12 +1,24 @@
-# Current Feature
+# Current Feature: Email Verification Toggle
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Add an `EMAIL_VERIFICATION_ENABLED` env variable (default: `true`) that controls whether email verification is enforced
+- When `false`, the proxy skips the unverified-user gate (no redirect to `/verify-email`)
+- When `false`, the register route skips sending the verification email and token creation
+- When `false`, users are treated as verified immediately after registration
+- Document the variable in `.env.example`
+- No code changes required to toggle — flip the env var and restart
+
 ## Notes
+
+- Current constraint: Resend has no custom domain configured, so only the Resend account email can receive verification emails in dev/staging
+- The toggle should be a single env var check, centralized in one place if possible, not scattered across files
+- The existing verification flow (token creation, email sending, verify-email page) stays intact — it just gets bypassed when the flag is off
+- Consider a server-side helper (e.g., `src/lib/flags.ts`) that reads and exports the flag so it can be imported wherever needed
 
 ## History
 
