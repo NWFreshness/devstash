@@ -1,33 +1,12 @@
-# Current Feature: Rate Limiting for Auth
+# Current Feature
 
 ## Status
 
-Complete
+Not Started
 
 ## Goals
 
-- Add rate limiting to all auth-related API routes
-- Use Upstash Redis + `@upstash/ratelimit` (serverless-compatible, sliding window)
-- Create reusable `src/lib/rate-limit.ts` utility
-- Return 429 with `Retry-After` header on breach; fail open if Upstash is unavailable
-- Display user-friendly toast errors on the frontend
-
-## Endpoints
-
-| Endpoint | Limit | Window | Key By |
-|----------|-------|--------|--------|
-| `/api/auth/callback/credentials` (login) | 5 | 15 min | IP + email |
-| `/api/auth/register` | 3 | 1 hour | IP |
-| `/api/auth/forgot-password` | 3 | 1 hour | IP |
-| `/api/auth/reset-password` | 5 | 15 min | IP |
-| `/api/auth/resend-verification` | 3 | 15 min | IP + email |
-
 ## Notes
-
-- Login rate limiting via NextAuth credentials flow — may need a custom sign-in handler since `/api/auth/callback/credentials` is internal to Auth.js
-- Fail open: if Upstash is down, allow the request through
-- Upstash free tier: 10k req/day (sufficient)
-- Env vars needed: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
 
 ## History
 
@@ -52,3 +31,4 @@ Complete
 - Email Verification Toggle: `EMAIL_VERIFICATION_ENABLED` env var (default `true`). New `src/lib/flags.ts` exports the flag for server-side use. Register route branches on the flag — when off, creates user with `emailVerified` pre-set and skips token/email; when on, existing `$transaction` path unchanged. `proxy.ts` reads the flag directly from `process.env` (Edge-safe) and skips the `/verify-email` redirect gate when off. Documented in `.env.example`. Build passes.
 - Forgot Password: "Forgot password?" link on sign-in page (next to Password label) → `/forgot-password`. `POST /api/auth/forgot-password` generates a reset token in `VerificationToken` (identifier `"reset:<email>"`), sends link via Resend, always returns success (no user enumeration). `POST /api/auth/reset-password` atomically deletes the token, validates expiry (1 hour), bcrypt-hashes and saves the new password. New pages `/forgot-password` and `/reset-password` in the `(auth)` route group; `/reset-password` without a token shows an invalid-link state. Sign-in shows `?reset=true` toast on success. No migration — reuses existing `VerificationToken` model. Build passes; all flows verified in browser.
 - Profile Page: `/profile` server component fetching user from DB (not session cache). User info card (avatar initials or GitHub image, name, email, member-since date). Usage stats card (total items, total collections, per-type breakdown across 7 system types). Change password form — visible only when `user.password` is set (hidden for GitHub OAuth users); validates current password server-side, bcrypt-hashes new password. Delete account — AlertDialog confirmation, `DELETE /api/profile` cascade-deletes user + all data, then client calls `signOut`. New helpers: `src/lib/db/profile.ts` (getProfileUser, getProfileStats). New API routes: `POST /api/profile/change-password`, `DELETE /api/profile`. Added `alert-dialog` shadcn component. Build passes; all flows verified in browser.
+- Rate Limiting for Auth: Upstash Redis sliding-window rate limits on all auth endpoints via new `src/lib/rate-limit.ts`. Limits: register (3/hr, by IP), forgot-password (3/hr, by IP), reset-password (5/15min, by IP), resend-verification (3/15min, by IP+email), login via CredentialsSignin authorize callback (5/15min, by IP+email). Returns 429 with `Retry-After` header and human-readable error message. Fails open when `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` are absent or Upstash errors. Frontend: sign-in form checks `res.code === "rate_limit"` for a specific message; verify-email form upgraded from boolean error state to surfacing `data.error`. Build passes; verified live against Upstash in dev.
