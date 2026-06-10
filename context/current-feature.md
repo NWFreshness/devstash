@@ -1,12 +1,24 @@
-# Current Feature
+# Current Feature: Profile Page
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Display user info: email, name, avatar (GitHub or initials), account creation date
+- Show usage stats: total items, total collections, breakdown by item type (snippet, prompt, note, command, url, file, image)
+- Change password form — email/password users only (hidden for GitHub OAuth users)
+- Delete account with confirmation dialog
+- Route protected by existing auth middleware
+
 ## Notes
+
+- Avatar: use GitHub image if available, fall back to initials from name/email (reuse `UserAvatar` component already in codebase)
+- Change password: only visible when the authenticated user has a `password` field set (i.e. not OAuth-only)
+- Delete account: show a shadcn AlertDialog for confirmation before calling delete API
+- Item type breakdown counts come from DB, scoped to the authenticated user
+- Follow existing data-fetching pattern: server component resolves session via `auth()`, passes user to helpers
 
 ## History
 
