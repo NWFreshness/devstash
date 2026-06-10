@@ -1,24 +1,12 @@
-# Current Feature: Email Verification Toggle
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add an `EMAIL_VERIFICATION_ENABLED` env variable (default: `true`) that controls whether email verification is enforced
-- When `false`, the proxy skips the unverified-user gate (no redirect to `/verify-email`)
-- When `false`, the register route skips sending the verification email and token creation
-- When `false`, users are treated as verified immediately after registration
-- Document the variable in `.env.example`
-- No code changes required to toggle — flip the env var and restart
-
 ## Notes
-
-- Current constraint: Resend has no custom domain configured, so only the Resend account email can receive verification emails in dev/staging
-- The toggle should be a single env var check, centralized in one place if possible, not scattered across files
-- The existing verification flow (token creation, email sending, verify-email page) stays intact — it just gets bypassed when the flag is off
-- Consider a server-side helper (e.g., `src/lib/flags.ts`) that reads and exports the flag so it can be imported wherever needed
 
 ## History
 
@@ -40,3 +28,4 @@ In Progress
 - Auth Credentials - Email/Password Provider (auth phase 2): added an Auth.js Credentials provider alongside GitHub. `src/auth.config.ts` carries a placeholder Credentials provider (`authorize: () => null`, edge-safe); `src/auth.ts` maps over `authConfig.providers` and replaces the `credentials` entry with real bcrypt validation against the DB (GitHub function passes through the map untouched). New `src/app/api/auth/register/route.ts` (POST) validates input, rejects duplicate emails (409), hashes with bcryptjs (cost 10), creates the user. Input validation centralized in new `src/lib/validations/auth.ts` using Zod 4 (`z.email()` top-level; email trimmed+lowercased before format check via `.pipe()`; password min 8; confirmPassword match via `.refine`); both the register route and the credentials `authorize` use these schemas. Added zod dependency. No migration (User.password already existed); JWT strategy already in place (required for Credentials). Build passes; verified register 201/duplicate 409/short-password 400/invalid-email 400/mismatch 400/malformed-body 400, email+password sign-in -> /dashboard, and GitHub OAuth still 302s to github.com. Created dev-DB test user creds-test@devstash.local (password "password123"). UI sign-in/register forms deferred to phase 3.
 - Auth UI - Sign In, Register & Sign Out (auth phase 3): replaced NextAuth default pages with custom UI. New `(auth)` route group with a centered-card layout plus `/sign-in` and `/register` pages; client forms in `src/components/auth/` use `next-auth/react` signIn (credentials with `redirect:false` + inline errors, GitHub via redirect) and the register form posts to `/api/auth/register` (reuses the Zod registerSchema) then redirects to `/sign-in`. `auth.config.ts` sets `pages.signIn:"/sign-in"`; `proxy.ts` redirects unauthenticated users there and its matcher now also protects `/profile`. Reusable `src/components/user-avatar.tsx` (GitHub image or initials). Sidebar footer (`app-sidebar.tsx`) now: avatar+name link to `/profile`, gear opens a shadcn DropdownMenu (Base UI) with Profile + Sign out (`signOut({redirectTo:"/sign-in"})`); it takes the authenticated session user, resolved via `auth()` in the dashboard layout (data queries still use the demo user - per-user data out of scope). New minimal `/profile` page (session user). Added shadcn dropdown-menu + label. Security: sign-in form sanitizes `callbackUrl` to a same-origin relative path (`safeRelative`) to prevent open redirects. Gotchas: lucide-react 1.16 dropped the GitHub brand icon (inline SVG used); Base UI Button rendered as a Link needs `nativeButton={false}` to avoid a console warning. Build passes; all 7 spec test steps verified in-browser (custom sign-in, GitHub handoff, email/password login, sidebar avatar initials, dropdown, sign out->/sign-in, register->account->/sign-in) plus proxy protects /dashboard and /profile. Extra dev-DB user ui-test@devstash.local (password "password123"). Note: `next.config.ts` had an unrelated `devIndicators:false` change left out of this commit.
 - Email Verification on Register: JWT flag + middleware gate approach. New `src/lib/email.ts` (Resend SDK wrapper); `emailVerified` added to JWT/session types and callbacks in `auth.ts` and `auth.config.ts`; `proxy.ts` gains a second gate redirecting unverified users to `/verify-email`. New API routes: `GET /api/auth/verify-email` (atomic token delete + user update, redirects to `/sign-in?verified=true`), `POST /api/auth/resend-verification` (replaces token, sends new email, no user enumeration). Register route wraps user + token creation in a single `$transaction`. New `/verify-email` page with email pre-fill from query param and resend form. Sign-in shows `?verified=true` toast via Sonner. Register form redirects to `/verify-email` on success. GitHub OAuth users are auto-verified via PrismaAdapter. Tokens are single-use (delete-first atomicity) and expire after 24h. Security fixes: atomic token claim prevents TOCTOU race; GitHub OAuth `redirectTo` sanitized with `safeRelative`. Build passes; all flows verified in browser.
+- Email Verification Toggle: `EMAIL_VERIFICATION_ENABLED` env var (default `true`). New `src/lib/flags.ts` exports the flag for server-side use. Register route branches on the flag — when off, creates user with `emailVerified` pre-set and skips token/email; when on, existing `$transaction` path unchanged. `proxy.ts` reads the flag directly from `process.env` (Edge-safe) and skips the `/verify-email` redirect gate when off. Documented in `.env.example`. Build passes.
