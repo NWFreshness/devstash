@@ -35,10 +35,12 @@ export function SignInForm({
   callbackUrl,
   registered,
   verified,
+  reset,
 }: {
   callbackUrl: string;
   registered?: boolean;
   verified?: boolean;
+  reset?: boolean;
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +53,10 @@ export function SignInForm({
     if (verified) {
       toast.success("Email verified! You can now sign in.");
     }
-  }, [registered, verified]);
+    if (reset) {
+      toast.success("Password updated! You can now sign in.");
+    }
+  }, [registered, verified, reset]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -89,7 +94,15 @@ export function SignInForm({
           <Input id="email" name="email" type="email" autoComplete="email" required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Password</Label>
+            <Link
+              href="/forgot-password"
+              className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <Input
             id="password"
             name="password"

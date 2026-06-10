@@ -19,3 +19,19 @@ export async function sendVerificationEmail(
     text: `Welcome to DevStash!\n\nClick the link below to verify your email address:\n\n${url.toString()}\n\nThis link expires in 24 hours. If you didn't create an account, you can ignore this email.`,
   });
 }
+
+export async function sendPasswordResetEmail(
+  to: string,
+  token: string,
+  origin: string,
+) {
+  const url = new URL("/reset-password", origin);
+  url.searchParams.set("token", token);
+
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: "Reset your DevStash password",
+    text: `You requested a password reset for your DevStash account.\n\nClick the link below to set a new password:\n\n${url.toString()}\n\nThis link expires in 1 hour. If you didn't request this, you can ignore this email.`,
+  });
+}
