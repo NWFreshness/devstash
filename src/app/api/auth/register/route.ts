@@ -4,8 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations/auth";
 import { sendVerificationEmail } from "@/lib/email";
 import { EMAIL_VERIFICATION_ENABLED } from "@/lib/flags";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  const limited = await checkRateLimit(req, "register");
+  if (limited) return limited;
   const body = await req.json().catch(() => null);
   const parsed = registerSchema.safeParse(body);
   if (!parsed.success) {

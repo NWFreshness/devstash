@@ -11,16 +11,24 @@ export function VerifyEmailForm() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState(searchParams.get("email") ?? "");
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function handleResend(e: React.FormEvent) {
     e.preventDefault();
     setStatus("loading");
+    setErrorMessage(null);
     const res = await fetch("/api/auth/resend-verification", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
     });
-    setStatus(res.ok ? "sent" : "error");
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setErrorMessage(data.error ?? "Something went wrong. Try again.");
+      setStatus("error");
+      return;
+    }
+    setStatus("sent");
   }
 
   return (
@@ -49,7 +57,7 @@ export function VerifyEmailForm() {
         )}
         {status === "error" && (
           <p className="text-sm text-destructive">
-            Something went wrong. Try again.
+            {errorMessage ?? "Something went wrong. Try again."}
           </p>
         )}
         <Button
