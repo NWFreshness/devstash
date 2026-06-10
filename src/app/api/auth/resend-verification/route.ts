@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { sendVerificationEmail } from "@/lib/email";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const schema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email()),
@@ -15,6 +16,10 @@ export async function POST(req: NextRequest) {
   }
 
   const { email } = parsed.data;
+
+  const limited = await checkRateLimit(req, "resendVerification", email);
+  if (limited) return limited;
+
   const user = await prisma.user.findUnique({ where: { email } });
 
   // Return 200 regardless — don't leak whether the email exists or is verified.

@@ -72,7 +72,11 @@ export function SignInForm({
 
     setLoading(false);
     if (res?.error) {
-      setError("Invalid email or password.");
+      setError(
+        res.code === "rate_limit"
+          ? "Too many sign-in attempts. Please wait a few minutes and try again."
+          : "Invalid email or password.",
+      );
       return;
     }
     router.push(safeRelative(callbackUrl));
