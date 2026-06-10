@@ -6,13 +6,6 @@ import { prisma } from "@/lib/prisma";
 import { authConfig } from "@/auth.config";
 import { signInSchema } from "@/lib/validations/auth";
 
-// Full config: adds the Prisma adapter and JWT session strategy on top of the
-// edge-safe providers in auth.config.ts. Import this throughout the app
-// (server components, route handlers) — but NOT in proxy.ts.
-//
-// The Credentials provider from auth.config.ts is a no-op placeholder; here we
-// swap it for one that validates email/password against the database with
-// bcrypt (these imports keep this file off the edge runtime).
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
@@ -41,6 +34,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               name: user.name,
               email: user.email,
               image: user.image,
+              emailVerified: user.emailVerified,
             };
           },
         }),
@@ -48,12 +42,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
+        token.id = user.id!;
+        token.emailVerified = user.emailVerified ?? null;
       }
       return token;
     },
     session({ session, token }) {
       session.user.id = token.id as string;
+      session.user.emailVerified = token.emailVerified as Date | null;
       return session;
     },
   },

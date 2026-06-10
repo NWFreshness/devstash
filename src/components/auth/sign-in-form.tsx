@@ -31,7 +31,15 @@ function GithubMark() {
   );
 }
 
-export function SignInForm({ callbackUrl, registered }: { callbackUrl: string; registered?: boolean }) {
+export function SignInForm({
+  callbackUrl,
+  registered,
+  verified,
+}: {
+  callbackUrl: string;
+  registered?: boolean;
+  verified?: boolean;
+}) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -40,7 +48,10 @@ export function SignInForm({ callbackUrl, registered }: { callbackUrl: string; r
     if (registered) {
       toast.success("Account created! You can now sign in.");
     }
-  }, [registered]);
+    if (verified) {
+      toast.success("Email verified! You can now sign in.");
+    }
+  }, [registered, verified]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -103,7 +114,7 @@ export function SignInForm({ callbackUrl, registered }: { callbackUrl: string; r
         type="button"
         variant="outline"
         className="w-full"
-        onClick={() => signIn("github", { redirectTo: callbackUrl })}
+        onClick={() => signIn("github", { redirectTo: safeRelative(callbackUrl) })}
       >
         <GithubMark />
         Sign in with GitHub
