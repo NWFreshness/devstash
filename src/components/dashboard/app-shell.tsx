@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { TopBar } from "@/components/dashboard/top-bar";
+import { ItemDrawerProvider } from "@/components/items/item-drawer";
 import { auth } from "@/auth";
 import { getSidebarCollections } from "@/lib/db/collections";
 import { getItemTypeCounts } from "@/lib/db/items";
@@ -34,7 +35,9 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       />
       <SidebarInset>
         <TopBar />
-        <div className="flex-1 overflow-auto p-6">{children}</div>
+        <ItemDrawerProvider>
+          <div className="flex-1 overflow-auto p-6">{children}</div>
+        </ItemDrawerProvider>
       </SidebarInset>
     </SidebarProvider>
   );

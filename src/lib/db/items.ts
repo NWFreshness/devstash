@@ -83,6 +83,55 @@ export async function getItemsByType(
   return items.map(shape);
 }
 
+export interface ItemDetail {
+  id: string;
+  title: string;
+  description: string | null;
+  content: string | null;
+  language: string | null;
+  url: string | null;
+  isFavorite: boolean;
+  isPinned: boolean;
+  type: { name: string; slug: string; icon: string | null; color: string | null };
+  collection: { name: string } | null;
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export async function getItemDetail(
+  userId: string | null,
+  itemId: string,
+): Promise<ItemDetail | null> {
+  if (!userId) return null;
+
+  const item = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    include: {
+      type: { select: { name: true, slug: true, icon: true, color: true } },
+      collection: { select: { name: true } },
+      tags: { include: { tag: { select: { name: true } } } },
+    },
+  });
+  if (!item) return null;
+
+  return {
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    content: item.content,
+    language: item.language,
+    url: item.url,
+    isFavorite: item.isFavorite,
+    isPinned: item.isPinned,
+    type: item.type,
+    collection: item.collection,
+    tags: item.tags.map((t) => t.tag.name),
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+  };
+}
+
 export interface DashboardStats {
   itemCount: number;
   collectionCount: number;

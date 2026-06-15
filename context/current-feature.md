@@ -1,12 +1,25 @@
-# Current Feature
+# Current Feature: Item Drawer
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Right-side slide-in drawer (shadcn Sheet) that opens when clicking an ItemCard — this is the item detail view (no separate item page)
+- Works on both the dashboard and items list pages
+- Client wrapper component manages drawer open/state since pages are server components
+- Card data (title, description, tags) comes from the server component as before; full detail (content, collections, language, etc.) fetched on click via `GET /api/items/[id]`
+- Query function lives in `lib/db/items.ts`; API route calls it with an auth check
+- Drawer shows a skeleton/loading state while fetching
+- Action bar: Favorite (star, yellow when active), Pin, Copy, Edit (pencil), Delete (trash, right-aligned) — per screenshot layout
+- Snappy UX: fetch on click, no page navigation
+- Detail display only for now — code editor and item-specific extras come later
+
 ## Notes
+
+- Reference: `context/screenshots/dashboard-ui-drawer.png`
+- Spec source: `context/features/item-drawer-spec.md`
 
 ## History
 

@@ -1,17 +1,23 @@
+"use client";
+
 import { Folder, Pin, Star } from "lucide-react";
 
 import type { ItemWithMeta } from "@/lib/db/items";
 import { Badge } from "@/components/ui/badge";
 import { iconByName } from "@/components/dashboard/type-icons";
+import { useItemDrawer } from "@/components/items/item-drawer";
 
 const FALLBACK_COLOR = "var(--muted-foreground)";
 
 export function ItemCard({ item }: { item: ItemWithMeta }) {
   const Icon = iconByName[item.type.icon ?? ""] ?? Folder;
   const color = item.type.color ?? FALLBACK_COLOR;
+  const openItem = useItemDrawer();
   return (
-    <div
-      className="flex flex-col gap-3 rounded-lg border-l-2 p-4 ring-1 ring-foreground/10 transition-colors hover:bg-muted/50"
+    <button
+      type="button"
+      onClick={() => openItem(item.id)}
+      className="flex flex-col gap-3 rounded-lg border-l-2 p-4 text-left ring-1 ring-foreground/10 transition-colors hover:bg-muted/50"
       style={{ borderLeftColor: color }}
     >
       <div className="flex items-start gap-3">
@@ -49,6 +55,6 @@ export function ItemCard({ item }: { item: ItemWithMeta }) {
           </Badge>
         ))}
       </div>
-    </div>
+    </button>
   );
 }
