@@ -51,6 +51,38 @@ export async function getRecentItems(
   return items.map(shape);
 }
 
+export interface SystemType {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
+  color: string | null;
+}
+
+export async function getSystemType(slug: string): Promise<SystemType | null> {
+  return prisma.itemType.findFirst({
+    where: { slug, isSystem: true },
+    select: { id: true, name: true, slug: true, icon: true, color: true },
+  });
+}
+
+export async function getItemsByType(
+  userId: string | null,
+  typeSlug: string,
+): Promise<ItemWithMeta[]> {
+  if (!userId) return [];
+
+  const items = await prisma.item.findMany({
+    where: { userId, type: { slug: typeSlug } },
+    orderBy: { createdAt: "desc" },
+    include: {
+      type: { select: { slug: true, icon: true, color: true } },
+      tags: { include: { tag: { select: { name: true } } } },
+    },
+  });
+  return items.map(shape);
+}
+
 export interface DashboardStats {
   itemCount: number;
   collectionCount: number;
