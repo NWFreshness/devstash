@@ -1,25 +1,12 @@
-# Current Feature: Item Drawer
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Right-side slide-in drawer (shadcn Sheet) that opens when clicking an ItemCard — this is the item detail view (no separate item page)
-- Works on both the dashboard and items list pages
-- Client wrapper component manages drawer open/state since pages are server components
-- Card data (title, description, tags) comes from the server component as before; full detail (content, collections, language, etc.) fetched on click via `GET /api/items/[id]`
-- Query function lives in `lib/db/items.ts`; API route calls it with an auth check
-- Drawer shows a skeleton/loading state while fetching
-- Action bar: Favorite (star, yellow when active), Pin, Copy, Edit (pencil), Delete (trash, right-aligned) — per screenshot layout
-- Snappy UX: fetch on click, no page navigation
-- Detail display only for now — code editor and item-specific extras come later
-
 ## Notes
-
-- Reference: `context/screenshots/dashboard-ui-drawer.png`
-- Spec source: `context/features/item-drawer-spec.md`
 
 ## History
 
@@ -48,3 +35,4 @@ In Progress
 - Items List View: dynamic route `/items/[type]` (kept top-level per decision, not nested under /dashboard) renders a type-filtered, responsive two-column grid (`md:grid-cols-2`) of `ItemCard` components, each with a left border colored by its DB item type. New DB helpers in `src/lib/db/items.ts`: `getSystemType(slug)` (header + `notFound()` guard for bad/non-system slugs) and `getItemsByType(userId, slug)` (mirrors `getRecentItems` shape, filters via `type: { slug }`). New `src/components/items/item-card.tsx` (card variant of the dashboard `ItemRow`; reuses `iconByName`, `Badge`, `FALLBACK_COLOR` idiom). Header icon/color sourced from the DB type (not the mock-data `typeColor/typeIcon` helpers) so it matches the card borders. To keep the sidebar shell on the items page, the dashboard layout's shell was extracted into a shared `src/components/dashboard/app-shell.tsx` (server component doing the session/demo-user/itemTypes/collections fetch + `SidebarProvider`/`AppSidebar`/`TopBar`); both `app/dashboard/layout.tsx` and new `app/items/layout.tsx` render `<AppShell>` (each sets `force-dynamic`). Proxy matcher extended to `["/dashboard/:path*", "/items/:path*", "/profile"]` so `/items/*` is auth-protected too. Seeded the dev DB (`npm run db:seed`) to verify. Build passes; verified in-browser (snippet/prompt/link grids with correct per-type colors, shell present, dashboard unchanged, 404 on bad slug).
 - Vitest Setup: added Vitest (v4) for unit testing server actions and utilities only (not React components). New `vitest.config.ts` uses the `node` environment, `include: src/**/*.test.ts`, and Vite's native `resolve.tsconfigPaths` for the `@/*` alias (no extra plugin). Added `test` (`vitest run`) and `test:watch` scripts. Seed tests colocated as `*.test.ts`: `src/lib/utils.test.ts` (`cn`) and `src/lib/validations/auth.test.ts` (all four auth Zod schemas) — 15 tests passing. Docs updated: workflow Test step in `context/ai-interaction.md` now folds in unit tests, `context/coding-standards.md` gained a Testing section, `CLAUDE.md` Commands lists `npm test`, and the `/feature` skill gained a `test` action. No `src/actions/` server actions exist yet (mutations live in API routes), so tests target utilities; infra is ready for action tests. Build and lint pass (one pre-existing unrelated lint error in `src/hooks/use-mobile.ts` left untouched).
 - Items List 3-Column Grid: items listing (`/items/[type]`) now shows three columns on large screens. Single Tailwind change in `src/app/items/[type]/page.tsx` (`md:grid-cols-2` -> `md:grid-cols-2 lg:grid-cols-3`); responsive behavior preserved (1 col mobile, 2 cols md, 3 cols lg). Layout-only — no data/component/logic changes, so no new tests. Build passes; existing 15 tests still green.
+- Item Drawer: right-side slide-in `Sheet` (Base UI dialog) shows full item detail on click — the item detail view, no separate item page. New client `ItemDrawerProvider` (`src/components/items/item-drawer.tsx`) holds open/loading/detail state and renders one shared Sheet; it exposes `openItem(id)` via context (`useItemDrawer`). Wired into `AppShell` (wrapping the content area) so the drawer works on both `/dashboard` and `/items/[type]`. `ItemCard` and `ItemRow` became `"use client"` `<button>`s that call `openItem(item.id)`. Card data still comes from the server component; full detail is fetched on click via new `GET /api/items/[id]` (auth-gated with `auth()`, then scoped to the demo user to match the rest of the app's demo-data pattern), backed by new `getItemDetail(userId, itemId)` in `src/lib/db/items.ts` (returns content, language, url, collection name, type, tags, flags, dates). Drawer shows a `Skeleton` while fetching, then: header (type icon + title, type/language badges), action bar (Favorite/Pin/Copy left, Edit/Delete right-aligned), and Description / Content (`<pre>` code block) / URL / Tags / Collection / Details (Created+Updated). Per spec this is display-only for now — Copy is wired (copies content/url to clipboard) and Favorite renders yellow when active; Pin/Edit/Delete are layout-only (mutations are a later feature). No DB-helper unit tests (mirrors existing untested Prisma helpers; codebase only unit-tests pure utilities). Build passes; 15 tests still green; lint clean except the pre-existing `use-mobile.ts` error (untouched). Verified in-browser signed in: clicking a dashboard pinned `ItemRow` and an items-page `ItemCard` both open the drawer with correct data/badges/action-bar/code/collection/dates matching the reference screenshot; Favorite star yellow for favorited items. Tags section not visually verified (seed creates no item tags) but its render code is identical to the working tag rendering in `ItemCard`.
