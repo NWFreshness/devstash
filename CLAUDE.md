@@ -35,6 +35,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run build` — production build
 - `npm run start` — serve the production build
 - `npm run lint` — ESLint (flat config via `eslint-config-next`)
+- `npm test` — Vitest unit tests (server actions + utilities only); watch: `npm run test:watch`
 
 ## Neon MCP
 
