@@ -43,3 +43,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# test/tool artifacts
+/*.png
+/.playwright-mcp/
+/.claude/agent-memory/
