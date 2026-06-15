@@ -25,5 +25,9 @@
       "Bash(break)",
       "mcp__plugin_playwright_playwright__browser_click"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "neon"
+  ],
+  "enableAllProjectMcpServers": true
 }

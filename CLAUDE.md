@@ -36,6 +36,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run start` — serve the production build
 - `npm run lint` — ESLint (flat config via `eslint-config-next`)
 
+## Neon MCP
+
+When using the Neon MCP for this project, ALWAYS target:
+
+- Project: `devstash` (projectId: `fancy-pine-37054808`)
+- Branch: `development` (branchId: `br-hidden-night-akzayhct`)
+
+Pass `branchId: "br-hidden-night-akzayhct"` on every Neon call (run_sql,
+get_database_tables, etc.).
+
+### Production is off-limits
+
+NEVER touch the `production` branch (`br-holy-frost-ak7wdano`) — no reads,
+no writes, no schema inspection — unless I explicitly name "production" in my
+request. Default to `development` for everything. If a task seems to require
+production, STOP and ask me first.
+
+NEVER run destructive SQL (DROP, DELETE, TRUNCATE, UPDATE/INSERT without my
+go-ahead) — ask first, even on the development branch.
+
 ## Behavioral Guidelines
 
 Guidelines to reduce common LLM coding mistakes.
