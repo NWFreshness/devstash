@@ -95,3 +95,10 @@ Example v4 configuration:
 - No unused imports or variables
 - Keep functions under 50 lines when possible
 ```
+
+## Testing
+
+- Vitest for unit tests. Run with `npm test` (watch: `npm run test:watch`)
+- Scope: server actions and utilities only - do NOT unit test React components
+- Colocate tests next to source as `*.test.ts` (e.g. `src/lib/utils.test.ts`)
+- `node` test environment; `@/*` path alias resolves from `tsconfig.json`
