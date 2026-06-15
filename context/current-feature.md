@@ -1,22 +1,12 @@
-# Current Feature: Items List View
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create dynamic route `/items/[type]` (e.g., /items/snippets, /items/notes)
-- Fetch and display items filtered by the type in the URL
-- Render a responsive grid of ItemCard components (two columns on medium and up)
-- Each card has a left border colored by its item type
-- Follow existing codebase patterns
-
 ## Notes
-
-- Spec source: `context/features/item-list-view-spec.md`
-- Sidebar item-type links already point to `/items/[slug]` (from the Stats & Sidebar work) — this route fulfills those links.
-- Reuse existing DB helpers in `src/lib/db/items.ts` and the type-color/icon mapping already used on the dashboard.
 
 ## History
 
@@ -42,3 +32,4 @@ In Progress
 - Forgot Password: "Forgot password?" link on sign-in page (next to Password label) → `/forgot-password`. `POST /api/auth/forgot-password` generates a reset token in `VerificationToken` (identifier `"reset:<email>"`), sends link via Resend, always returns success (no user enumeration). `POST /api/auth/reset-password` atomically deletes the token, validates expiry (1 hour), bcrypt-hashes and saves the new password. New pages `/forgot-password` and `/reset-password` in the `(auth)` route group; `/reset-password` without a token shows an invalid-link state. Sign-in shows `?reset=true` toast on success. No migration — reuses existing `VerificationToken` model. Build passes; all flows verified in browser.
 - Profile Page: `/profile` server component fetching user from DB (not session cache). User info card (avatar initials or GitHub image, name, email, member-since date). Usage stats card (total items, total collections, per-type breakdown across 7 system types). Change password form — visible only when `user.password` is set (hidden for GitHub OAuth users); validates current password server-side, bcrypt-hashes new password. Delete account — AlertDialog confirmation, `DELETE /api/profile` cascade-deletes user + all data, then client calls `signOut`. New helpers: `src/lib/db/profile.ts` (getProfileUser, getProfileStats). New API routes: `POST /api/profile/change-password`, `DELETE /api/profile`. Added `alert-dialog` shadcn component. Build passes; all flows verified in browser.
 - Rate Limiting for Auth: Upstash Redis sliding-window rate limits on all auth endpoints via new `src/lib/rate-limit.ts`. Limits: register (3/hr, by IP), forgot-password (3/hr, by IP), reset-password (5/15min, by IP), resend-verification (3/15min, by IP+email), login via CredentialsSignin authorize callback (5/15min, by IP+email). Returns 429 with `Retry-After` header and human-readable error message. Fails open when `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` are absent or Upstash errors. Frontend: sign-in form checks `res.code === "rate_limit"` for a specific message; verify-email form upgraded from boolean error state to surfacing `data.error`. Build passes; verified live against Upstash in dev.
+- Items List View: dynamic route `/items/[type]` (kept top-level per decision, not nested under /dashboard) renders a type-filtered, responsive two-column grid (`md:grid-cols-2`) of `ItemCard` components, each with a left border colored by its DB item type. New DB helpers in `src/lib/db/items.ts`: `getSystemType(slug)` (header + `notFound()` guard for bad/non-system slugs) and `getItemsByType(userId, slug)` (mirrors `getRecentItems` shape, filters via `type: { slug }`). New `src/components/items/item-card.tsx` (card variant of the dashboard `ItemRow`; reuses `iconByName`, `Badge`, `FALLBACK_COLOR` idiom). Header icon/color sourced from the DB type (not the mock-data `typeColor/typeIcon` helpers) so it matches the card borders. To keep the sidebar shell on the items page, the dashboard layout's shell was extracted into a shared `src/components/dashboard/app-shell.tsx` (server component doing the session/demo-user/itemTypes/collections fetch + `SidebarProvider`/`AppSidebar`/`TopBar`); both `app/dashboard/layout.tsx` and new `app/items/layout.tsx` render `<AppShell>` (each sets `force-dynamic`). Proxy matcher extended to `["/dashboard/:path*", "/items/:path*", "/profile"]` so `/items/*` is auth-protected too. Seeded the dev DB (`npm run db:seed`) to verify. Build passes; verified in-browser (snippet/prompt/link grids with correct per-type colors, shell present, dashboard unchanged, 404 on bad slug).
