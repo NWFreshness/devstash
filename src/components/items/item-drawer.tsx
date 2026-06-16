@@ -11,8 +11,19 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Copy, Folder, Pencil, Pin, Star, Trash2 } from "lucide-react";
 
-import { updateItem } from "@/actions/items";
+import { deleteItem, updateItem } from "@/actions/items";
 import type { ItemDetail } from "@/lib/db/items";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,7 +85,11 @@ export function ItemDrawerProvider({
           {loading || !detail ? (
             <DrawerSkeleton />
           ) : (
-            <ItemDetailView detail={detail} onUpdated={setDetail} />
+            <ItemDetailView
+              detail={detail}
+              onUpdated={setDetail}
+              onDeleted={() => setOpen(false)}
+            />
           )}
         </SheetContent>
       </Sheet>
@@ -113,17 +128,34 @@ function Section({
 function ItemDetailView({
   detail,
   onUpdated,
+  onDeleted,
 }: {
   detail: ItemDetail;
   onUpdated: (detail: ItemDetail) => void;
+  onDeleted: () => void;
 }) {
+  const router = useRouter();
   const [editing, setEditing] = useState(false);
+  const [deleting, startDelete] = useTransition();
   const Icon = iconByName[detail.type.icon ?? ""] ?? Folder;
   const color = detail.type.color ?? FALLBACK_COLOR;
 
   function copyContent() {
     const text = detail.content ?? detail.url ?? "";
     if (text) navigator.clipboard.writeText(text);
+  }
+
+  function handleDelete() {
+    startDelete(async () => {
+      const result = await deleteItem(detail.id);
+      if (result.success) {
+        toast.success("Item deleted.");
+        onDeleted();
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    });
   }
 
   if (editing) {
@@ -186,10 +218,41 @@ function ItemDetailView({
             <Pencil />
             Edit
           </Button>
-          <Button variant="ghost" size="icon-sm" className="text-destructive">
-            <Trash2 />
-            <span className="sr-only">Delete</span>
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="text-destructive"
+                />
+              }
+            >
+              <Trash2 />
+              <span className="sr-only">Delete</span>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete this item?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This permanently deletes &ldquo;{detail.title}&rdquo;. This
+                  action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleting}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                >
+                  {deleting ? "Deleting..." : "Delete"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 

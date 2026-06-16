@@ -172,6 +172,19 @@ export async function updateItem(
   return getItemDetail(userId, itemId);
 }
 
+export async function deleteItem(
+  userId: string | null,
+  itemId: string,
+): Promise<boolean> {
+  if (!userId) return false;
+
+  // Scope by userId so the delete is the ownership check; ItemTag rows cascade.
+  const { count } = await prisma.item.deleteMany({
+    where: { id: itemId, userId },
+  });
+  return count > 0;
+}
+
 export interface DashboardStats {
   itemCount: number;
   collectionCount: number;

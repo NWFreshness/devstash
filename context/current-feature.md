@@ -1,12 +1,25 @@
-# Current Feature
+# Current Feature: Delete Item
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- The drawer's Delete (trash) button — currently layout-only — opens a shadcn `AlertDialog` confirmation ("Delete this item? This can't be undone." with Cancel / Delete actions)
+- Confirming deletes the item via a new server action; the Delete action button shows a pending state while in flight
+- On success: show a success toast (Sonner), close the drawer, and `router.refresh()` so the underlying card/list reflects the removal
+- On error: show an error toast; drawer stays open
+- New server action `deleteItem(itemId)` in `src/actions/items.ts` using the `{ success, error }` pattern: `auth()` gate, then scope the delete to the demo user (matches the app's demo-data pattern)
+- New query function `deleteItem(userId, itemId)` in `src/lib/db/items.ts`: ownership-scoped delete (returns whether a row was actually deleted); `ItemTag` rows cascade automatically (`onDelete: Cascade` in schema)
+
 ## Notes
+
+- Reuse the existing `alert-dialog` shadcn component (already added for the profile delete-account flow) — no new dependency
+- Delete confirmation lives in the drawer (`src/components/items/item-drawer.tsx`), wired to the existing Delete button in the view-mode action bar
+- Mirror the `updateItem` action/query pattern shipped in Item Drawer Edit Mode (auth + demo-user scoping, `useTransition` for pending)
+- Closing the drawer after delete avoids a 404 re-fetch of the now-deleted item
+- Likely no new unit tests: delete has no Zod payload/pure logic to validate (the action is auth/Prisma-only, untested per codebase convention) — confirm during the test step
 
 ## History
 
