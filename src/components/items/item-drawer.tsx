@@ -1,13 +1,25 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+  useTransition,
+} from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Copy, Folder, Pencil, Pin, Star, Trash2 } from "lucide-react";
 
+import { updateItem } from "@/actions/items";
 import type { ItemDetail } from "@/lib/db/items";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Sheet,
   SheetContent,
@@ -15,6 +27,9 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { iconByName } from "@/components/dashboard/type-icons";
+
+const CONTENT_TYPES = new Set(["snippet", "prompt", "command", "note"]);
+const LANGUAGE_TYPES = new Set(["snippet", "command"]);
 
 const FALLBACK_COLOR = "var(--muted-foreground)";
 
@@ -59,7 +74,7 @@ export function ItemDrawerProvider({
           {loading || !detail ? (
             <DrawerSkeleton />
           ) : (
-            <ItemDetailView detail={detail} />
+            <ItemDetailView detail={detail} onUpdated={setDetail} />
           )}
         </SheetContent>
       </Sheet>
@@ -95,13 +110,33 @@ function Section({
   );
 }
 
-function ItemDetailView({ detail }: { detail: ItemDetail }) {
+function ItemDetailView({
+  detail,
+  onUpdated,
+}: {
+  detail: ItemDetail;
+  onUpdated: (detail: ItemDetail) => void;
+}) {
+  const [editing, setEditing] = useState(false);
   const Icon = iconByName[detail.type.icon ?? ""] ?? Folder;
   const color = detail.type.color ?? FALLBACK_COLOR;
 
   function copyContent() {
     const text = detail.content ?? detail.url ?? "";
     if (text) navigator.clipboard.writeText(text);
+  }
+
+  if (editing) {
+    return (
+      <ItemEditForm
+        detail={detail}
+        onCancel={() => setEditing(false)}
+        onSaved={(updated) => {
+          onUpdated(updated);
+          setEditing(false);
+        }}
+      />
+    );
   }
 
   return (
@@ -147,7 +182,7 @@ function ItemDetailView({ detail }: { detail: ItemDetail }) {
           Copy
         </Button>
         <div className="ml-auto flex items-center gap-1">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
             <Pencil />
             Edit
           </Button>
@@ -218,6 +253,148 @@ function ItemDetailView({ detail }: { detail: ItemDetail }) {
             </div>
           </dl>
         </Section>
+      </div>
+    </>
+  );
+}
+
+function ItemEditForm({
+  detail,
+  onCancel,
+  onSaved,
+}: {
+  detail: ItemDetail;
+  onCancel: () => void;
+  onSaved: (detail: ItemDetail) => void;
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+
+  const [title, setTitle] = useState(detail.title);
+  const [description, setDescription] = useState(detail.description ?? "");
+  const [content, setContent] = useState(detail.content ?? "");
+  const [language, setLanguage] = useState(detail.language ?? "");
+  const [url, setUrl] = useState(detail.url ?? "");
+  const [tags, setTags] = useState(detail.tags.join(", "));
+
+  const showContent = CONTENT_TYPES.has(detail.type.slug);
+  const showLanguage = LANGUAGE_TYPES.has(detail.type.slug);
+  const showUrl = detail.type.slug === "link";
+
+  function save() {
+    startTransition(async () => {
+      const result = await updateItem(detail.id, {
+        title,
+        description,
+        content: showContent ? content : null,
+        language: showLanguage ? language : null,
+        url: showUrl ? url : null,
+        tags: tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
+      });
+
+      if (result.success) {
+        toast.success("Item updated.");
+        onSaved(result.data);
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    });
+  }
+
+  return (
+    <>
+      <SheetHeader className="pr-12">
+        <SheetTitle>Edit item</SheetTitle>
+      </SheetHeader>
+
+      <Separator />
+
+      <div className="flex items-center gap-1 px-4 py-2">
+        <Button
+          size="sm"
+          onClick={save}
+          disabled={pending || title.trim() === ""}
+        >
+          {pending ? "Saving..." : "Save"}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onCancel}
+          disabled={pending}
+        >
+          Cancel
+        </Button>
+      </div>
+
+      <Separator />
+
+      <div className="space-y-5 p-4">
+        <div className="space-y-2">
+          <Label htmlFor="edit-title">Title</Label>
+          <Input
+            id="edit-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="edit-description">Description</Label>
+          <Textarea
+            id="edit-description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+
+        {showContent && (
+          <div className="space-y-2">
+            <Label htmlFor="edit-content">Content</Label>
+            <Textarea
+              id="edit-content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className="min-h-40 font-mono text-xs"
+            />
+          </div>
+        )}
+
+        {showLanguage && (
+          <div className="space-y-2">
+            <Label htmlFor="edit-language">Language</Label>
+            <Input
+              id="edit-language"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+            />
+          </div>
+        )}
+
+        {showUrl && (
+          <div className="space-y-2">
+            <Label htmlFor="edit-url">URL</Label>
+            <Input
+              id="edit-url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+            />
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="edit-tags">Tags</Label>
+          <Input
+            id="edit-tags"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="comma, separated, tags"
+          />
+        </div>
       </div>
     </>
   );

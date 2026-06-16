@@ -1,12 +1,32 @@
-# Current Feature
+# Current Feature: Item Drawer — Edit Mode
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Edit button in the drawer action bar toggles the open drawer from view mode into inline edit mode (same drawer, fields become editable inputs)
+- In edit mode, the action bar is replaced with Save and Cancel buttons
+  - Cancel discards changes, returns to view mode
+  - Save persists via server action, returns to view mode, refreshes drawer data, and shows a success/error toast
+- Editable fields (all types): Title (text, required), Description (textarea, optional), Tags (comma-separated input → tag array on save)
+- Type-specific editable fields, shown only for the relevant type:
+  - Content (textarea) — snippet, prompt, command, note
+  - Language (text) — snippet, command
+  - URL (text) — link
+- Display-only in edit mode: item type, collection, created/updated dates
+- New server action `updateItem(itemId, data)` in `src/actions/items.ts` using the `{ success, data, error }` pattern: Zod-validate input, `auth()` session, ownership check, then call the query function
+- New query function `updateItem` in `src/lib/db/items.ts`: tag handling disconnect-all then connect-or-create; returns the updated `ItemDetail` so the drawer refreshes without a second fetch
+- Zod update schema (title non-empty trimmed; description/content/url/language string|null optional; url valid URL; tags array of trimmed non-empty strings); return Zod errors in the error response
+- `router.refresh()` after save so the underlying card list reflects changes
+
 ## Notes
+
+- Keep it simple — no form library; controlled inputs with local state
+- Client guard: disable Save when title is empty; server-side Zod is the source of truth
+- Content textarea is a plain textarea (not a code editor — that comes later)
+- This is the first `src/actions/` server action in the codebase (mutations have lived in API routes until now) — gives us a real action to unit-test per the Vitest setup
 
 ## History
 
