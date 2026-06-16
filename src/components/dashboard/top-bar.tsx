@@ -1,8 +1,9 @@
-import { FolderPlus, Plus, Search } from "lucide-react";
+import { FolderPlus, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { CreateItemDialog } from "@/components/items/create-item-dialog";
 
 /** Dashboard top bar. Search is display only; the trigger toggles the sidebar. */
 export function TopBar() {
@@ -27,10 +28,7 @@ export function TopBar() {
           <FolderPlus data-icon="inline-start" />
           New Collection
         </Button>
-        <Button size="lg">
-          <Plus data-icon="inline-start" />
-          New Item
-        </Button>
+        <CreateItemDialog />
       </div>
     </header>
   );

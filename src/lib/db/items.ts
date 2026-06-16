@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { UpdateItemInput } from "@/lib/validations/item";
+import type { CreateItemInput, UpdateItemInput } from "@/lib/validations/item";
 
 export interface ItemWithMeta {
   id: string;
@@ -131,6 +131,45 @@ export async function getItemDetail(
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
   };
+}
+
+export async function createItem(
+  userId: string | null,
+  data: CreateItemInput,
+): Promise<ItemDetail | null> {
+  if (!userId) return null;
+
+  const type = await prisma.itemType.findFirst({
+    where: { slug: data.typeSlug, isSystem: true },
+    select: { id: true },
+  });
+  if (!type) return null;
+
+  const item = await prisma.item.create({
+    data: {
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      url: data.url,
+      language: data.language,
+      contentType: "text",
+      userId,
+      typeId: type.id,
+      tags: {
+        create: data.tags.map((name) => ({
+          tag: {
+            connectOrCreate: {
+              where: { userId_name: { userId, name } },
+              create: { name, userId },
+            },
+          },
+        })),
+      },
+    },
+    select: { id: true },
+  });
+
+  return getItemDetail(userId, item.id);
 }
 
 export async function updateItem(
