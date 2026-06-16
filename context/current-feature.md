@@ -1,29 +1,18 @@
-# Current Feature: Markdown Editor
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create `MarkdownEditor` component with Write/Preview tabs
-- Use `react-markdown` + `remark-gfm` for GitHub Flavored Markdown
-- Replace `Textarea` with `MarkdownEditor` for note and prompt types only (leave `CodeEditor` for snippet/command untouched)
-- Match existing dark theme styling (`bg-[#1e1e1e]` container, `bg-[#2d2d2d]` header, copy button in header)
-- Readonly mode shows Preview tab only; edit mode defaults to Write tab
-- Proper markdown styling: headings, code blocks, inline code, lists, blockquotes, links, tables — via `.markdown-preview` CSS class
-- Fluid height up to 400px (matching `CodeEditor`)
-- Integrated in: `CreateItemDialog` (note/prompt content), `ItemDrawer` edit mode (note/prompt content), `ItemDrawer` view mode (note/prompt readonly)
-
 ## Notes
-
-- Keep `CodeEditor` for snippet/command — no changes to that path
-- Use a custom `.markdown-preview` CSS class in `globals.css` for reliable dark mode prose styling
-- Spec file: `context/features/markdown-editor-spec.md`
 
 ## History
 
 <!-- Keep this updated. Earliest to latest -->
+
+- Markdown Editor: new `src/components/ui/markdown-editor.tsx` wraps `react-markdown` + `remark-gfm` with Write/Preview tabs, a Copy button, and dark theme styling matching `CodeEditor` (`bg-[#1e1e1e]` container, `bg-[#2d2d2d]` header). Readonly mode shows Preview tab only; edit mode defaults to Write. Added `.markdown-preview` CSS class in `globals.css` for prose styling (h1–h6, code blocks, inline code, lists, blockquotes, links, tables, hr). Integrated in three places: `ItemDrawer` view mode (replaces `<pre>` block for note/prompt), `ItemDrawer` edit mode (replaces `<Textarea>` for note/prompt), and `CreateItemDialog` (replaces `<Textarea>` for note/prompt content field). `CodeEditor` and plain `<Textarea>` paths for snippet/command/link are untouched. Dependencies added: `react-markdown`, `remark-gfm`. Build passes; 34 tests still green; verified in-browser (prompt view readonly preview, edit Write/Preview tab toggle, CreateItemDialog note type with MarkdownEditor, snippet type still uses plain textarea).
 
 - Project setup and boilerplate cleanup
 - Initial Next.js and Tailwind setup
