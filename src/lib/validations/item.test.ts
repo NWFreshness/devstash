@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { updateItemSchema } from "@/lib/validations/item";
+import { createItemSchema, updateItemSchema } from "@/lib/validations/item";
 
 describe("updateItemSchema", () => {
   it("accepts a minimal valid payload", () => {
@@ -58,5 +58,63 @@ describe("updateItemSchema", () => {
     expect(
       updateItemSchema.safeParse({ title: "x", tags: ["ok", ""] }).success,
     ).toBe(false);
+  });
+});
+
+describe("createItemSchema", () => {
+  it("accepts a minimal valid payload", () => {
+    const result = createItemSchema.parse({
+      typeSlug: "snippet",
+      title: "My Item",
+    });
+    expect(result).toEqual({
+      typeSlug: "snippet",
+      title: "My Item",
+      description: null,
+      content: null,
+      url: null,
+      language: null,
+      tags: [],
+    });
+  });
+
+  it("rejects an unknown type slug", () => {
+    expect(
+      createItemSchema.safeParse({ typeSlug: "regex", title: "x" }).success,
+    ).toBe(false);
+  });
+
+  it("rejects an empty title", () => {
+    expect(
+      createItemSchema.safeParse({ typeSlug: "note", title: "   " }).success,
+    ).toBe(false);
+  });
+
+  it("requires a URL for link items", () => {
+    expect(
+      createItemSchema.safeParse({ typeSlug: "link", title: "x" }).success,
+    ).toBe(false);
+    expect(
+      createItemSchema.safeParse({
+        typeSlug: "link",
+        title: "x",
+        url: "https://example.com",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("does not require a URL for non-link items", () => {
+    expect(
+      createItemSchema.safeParse({ typeSlug: "snippet", title: "x" }).success,
+    ).toBe(true);
+  });
+
+  it("preserves content whitespace (no trim)", () => {
+    const result = createItemSchema.parse({
+      typeSlug: "snippet",
+      title: "x",
+      content: "  code  ",
+    });
+    expect(result.content).toBe("  code  ");
   });
 });

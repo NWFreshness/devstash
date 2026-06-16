@@ -2,16 +2,40 @@
 
 import { auth } from "@/auth";
 import {
+  createItem as createItemQuery,
   deleteItem as deleteItemQuery,
   updateItem as updateItemQuery,
   type ItemDetail,
 } from "@/lib/db/items";
 import { getDemoUser } from "@/lib/db/user";
-import { updateItemSchema } from "@/lib/validations/item";
+import { createItemSchema, updateItemSchema } from "@/lib/validations/item";
 
 type ActionResult<T> =
   | { success: true; data: T }
   | { success: false; error: string };
+
+export async function createItem(
+  input: unknown,
+): Promise<ActionResult<ItemDetail>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const parsed = createItemSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0].message };
+  }
+
+  // Items are seeded under the demo user, matching the rest of the app.
+  const demoUser = await getDemoUser();
+  const created = await createItemQuery(demoUser?.id ?? null, parsed.data);
+  if (!created) {
+    return { success: false, error: "Could not create item." };
+  }
+
+  return { success: true, data: created };
+}
 
 export async function updateItem(
   itemId: string,

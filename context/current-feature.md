@@ -1,12 +1,27 @@
-# Current Feature
+# Current Feature: Item Create
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Add new items via a shadcn Dialog modal, opened from the "New Item" button in the top bar
+- Type selector for: snippet, prompt, command, note, link
+- Type-gated fields:
+  - All types: title (required), description, tags
+  - snippet/command: content, language
+  - prompt/note: content
+  - link: URL (required)
+- Server action `createItem` with Zod validation
+- Query function `createItem` in `lib/db/items.ts`
+- Toast on success, close modal and refresh the list
+
 ## Notes
+
+- Source spec: `context/features/item-create-spec.md`
+- Mirror existing patterns: edit/delete already use `src/actions/items.ts`, `src/lib/validations/item.ts`, and demo-user scoping
+- Type-gating field sets already exist in the drawer edit form (CONTENT_TYPES, LANGUAGE_TYPES, link-only URL) — reuse the same idioms
 
 ## History
 
