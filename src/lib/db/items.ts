@@ -8,6 +8,8 @@ export interface ItemWithMeta {
   isPinned: boolean;
   isFavorite: boolean;
   fileUrl: string | null;
+  fileName: string | null;
+  fileSize: number | null;
   createdAt: Date;
   type: { slug: string; icon: string | null; color: string | null };
   tags: string[];
@@ -20,6 +22,8 @@ function shape(item: {
   isPinned: boolean;
   isFavorite: boolean;
   fileUrl: string | null;
+  fileName: string | null;
+  fileSize: number | null;
   createdAt: Date;
   type: { slug: string; icon: string | null; color: string | null };
   tags: { tag: { name: string } }[];
@@ -31,6 +35,8 @@ function shape(item: {
     isPinned: item.isPinned,
     isFavorite: item.isFavorite,
     fileUrl: item.fileUrl,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
     createdAt: item.createdAt,
     type: item.type,
     tags: item.tags.map((t) => t.tag.name),
