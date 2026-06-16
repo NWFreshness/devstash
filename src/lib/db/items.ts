@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { UpdateItemInput } from "@/lib/validations/item";
 
 export interface ItemWithMeta {
   id: string;
@@ -130,6 +131,45 @@ export async function getItemDetail(
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
   };
+}
+
+export async function updateItem(
+  userId: string | null,
+  itemId: string,
+  data: UpdateItemInput,
+): Promise<ItemDetail | null> {
+  if (!userId) return null;
+
+  // Scope by userId so the update is the ownership check (returns null if not owned).
+  const existing = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    select: { id: true },
+  });
+  if (!existing) return null;
+
+  await prisma.item.update({
+    where: { id: itemId },
+    data: {
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      url: data.url,
+      language: data.language,
+      tags: {
+        deleteMany: {},
+        create: data.tags.map((name) => ({
+          tag: {
+            connectOrCreate: {
+              where: { userId_name: { userId, name } },
+              create: { name, userId },
+            },
+          },
+        })),
+      },
+    },
+  });
+
+  return getItemDetail(userId, itemId);
 }
 
 export interface DashboardStats {
