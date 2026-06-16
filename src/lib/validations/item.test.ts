@@ -75,6 +75,10 @@ describe("createItemSchema", () => {
       url: null,
       language: null,
       tags: [],
+      fileUrl: null,
+      fileName: null,
+      fileSize: null,
+      mimeType: null,
     });
   });
 

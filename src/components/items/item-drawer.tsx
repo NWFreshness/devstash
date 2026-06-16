@@ -9,7 +9,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Copy, Folder, Pencil, Pin, Star, Trash2 } from "lucide-react";
+import { Copy, Download, Folder, Pencil, Pin, Star, Trash2 } from "lucide-react";
 
 import { deleteItem, updateItem } from "@/actions/items";
 import type { ItemDetail } from "@/lib/db/items";
@@ -216,6 +216,21 @@ function ItemDetailView({
           <Copy />
           Copy
         </Button>
+        {detail.fileUrl && (
+          <Button
+            variant="ghost"
+            size="sm"
+            render={
+              <a
+                href={`/api/download/${detail.fileUrl}`}
+                download={detail.fileName ?? undefined}
+              />
+            }
+          >
+            <Download />
+            Download
+          </Button>
+        )}
         <div className="ml-auto flex items-center gap-1">
           <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
             <Pencil />
@@ -265,6 +280,31 @@ function ItemDetailView({
         {detail.description && (
           <Section title="Description">
             <p className="text-sm">{detail.description}</p>
+          </Section>
+        )}
+
+        {detail.type.slug === "image" && detail.fileUrl && (
+          <Section title="Preview">
+            <img
+              src={`/api/download/${detail.fileUrl}`}
+              alt={detail.title}
+              className="max-h-64 w-full rounded-md border object-contain"
+            />
+          </Section>
+        )}
+
+        {detail.type.slug === "file" && detail.fileName && (
+          <Section title="File">
+            <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2 text-sm">
+              <span className="truncate text-foreground">{detail.fileName}</span>
+              {detail.fileSize !== null && (
+                <span className="ml-2 shrink-0 text-muted-foreground">
+                  {detail.fileSize < 1024 * 1024
+                    ? `${(detail.fileSize / 1024).toFixed(1)} KB`
+                    : `${(detail.fileSize / (1024 * 1024)).toFixed(1)} MB`}
+                </span>
+              )}
+            </div>
           </Section>
         )}
 
