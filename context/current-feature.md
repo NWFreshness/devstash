@@ -1,32 +1,12 @@
-# Current Feature: Item Drawer — Edit Mode
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Edit button in the drawer action bar toggles the open drawer from view mode into inline edit mode (same drawer, fields become editable inputs)
-- In edit mode, the action bar is replaced with Save and Cancel buttons
-  - Cancel discards changes, returns to view mode
-  - Save persists via server action, returns to view mode, refreshes drawer data, and shows a success/error toast
-- Editable fields (all types): Title (text, required), Description (textarea, optional), Tags (comma-separated input → tag array on save)
-- Type-specific editable fields, shown only for the relevant type:
-  - Content (textarea) — snippet, prompt, command, note
-  - Language (text) — snippet, command
-  - URL (text) — link
-- Display-only in edit mode: item type, collection, created/updated dates
-- New server action `updateItem(itemId, data)` in `src/actions/items.ts` using the `{ success, data, error }` pattern: Zod-validate input, `auth()` session, ownership check, then call the query function
-- New query function `updateItem` in `src/lib/db/items.ts`: tag handling disconnect-all then connect-or-create; returns the updated `ItemDetail` so the drawer refreshes without a second fetch
-- Zod update schema (title non-empty trimmed; description/content/url/language string|null optional; url valid URL; tags array of trimmed non-empty strings); return Zod errors in the error response
-- `router.refresh()` after save so the underlying card list reflects changes
-
 ## Notes
-
-- Keep it simple — no form library; controlled inputs with local state
-- Client guard: disable Save when title is empty; server-side Zod is the source of truth
-- Content textarea is a plain textarea (not a code editor — that comes later)
-- This is the first `src/actions/` server action in the codebase (mutations have lived in API routes until now) — gives us a real action to unit-test per the Vitest setup
 
 ## History
 
@@ -56,3 +36,4 @@ In Progress
 - Vitest Setup: added Vitest (v4) for unit testing server actions and utilities only (not React components). New `vitest.config.ts` uses the `node` environment, `include: src/**/*.test.ts`, and Vite's native `resolve.tsconfigPaths` for the `@/*` alias (no extra plugin). Added `test` (`vitest run`) and `test:watch` scripts. Seed tests colocated as `*.test.ts`: `src/lib/utils.test.ts` (`cn`) and `src/lib/validations/auth.test.ts` (all four auth Zod schemas) — 15 tests passing. Docs updated: workflow Test step in `context/ai-interaction.md` now folds in unit tests, `context/coding-standards.md` gained a Testing section, `CLAUDE.md` Commands lists `npm test`, and the `/feature` skill gained a `test` action. No `src/actions/` server actions exist yet (mutations live in API routes), so tests target utilities; infra is ready for action tests. Build and lint pass (one pre-existing unrelated lint error in `src/hooks/use-mobile.ts` left untouched).
 - Items List 3-Column Grid: items listing (`/items/[type]`) now shows three columns on large screens. Single Tailwind change in `src/app/items/[type]/page.tsx` (`md:grid-cols-2` -> `md:grid-cols-2 lg:grid-cols-3`); responsive behavior preserved (1 col mobile, 2 cols md, 3 cols lg). Layout-only — no data/component/logic changes, so no new tests. Build passes; existing 15 tests still green.
 - Item Drawer: right-side slide-in `Sheet` (Base UI dialog) shows full item detail on click — the item detail view, no separate item page. New client `ItemDrawerProvider` (`src/components/items/item-drawer.tsx`) holds open/loading/detail state and renders one shared Sheet; it exposes `openItem(id)` via context (`useItemDrawer`). Wired into `AppShell` (wrapping the content area) so the drawer works on both `/dashboard` and `/items/[type]`. `ItemCard` and `ItemRow` became `"use client"` `<button>`s that call `openItem(item.id)`. Card data still comes from the server component; full detail is fetched on click via new `GET /api/items/[id]` (auth-gated with `auth()`, then scoped to the demo user to match the rest of the app's demo-data pattern), backed by new `getItemDetail(userId, itemId)` in `src/lib/db/items.ts` (returns content, language, url, collection name, type, tags, flags, dates). Drawer shows a `Skeleton` while fetching, then: header (type icon + title, type/language badges), action bar (Favorite/Pin/Copy left, Edit/Delete right-aligned), and Description / Content (`<pre>` code block) / URL / Tags / Collection / Details (Created+Updated). Per spec this is display-only for now — Copy is wired (copies content/url to clipboard) and Favorite renders yellow when active; Pin/Edit/Delete are layout-only (mutations are a later feature). No DB-helper unit tests (mirrors existing untested Prisma helpers; codebase only unit-tests pure utilities). Build passes; 15 tests still green; lint clean except the pre-existing `use-mobile.ts` error (untouched). Verified in-browser signed in: clicking a dashboard pinned `ItemRow` and an items-page `ItemCard` both open the drawer with correct data/badges/action-bar/code/collection/dates matching the reference screenshot; Favorite star yellow for favorited items. Tags section not visually verified (seed creates no item tags) but its render code is identical to the working tag rendering in `ItemCard`.
+- Item Drawer Edit Mode: the drawer's Edit (pencil) button now toggles the open Sheet from view mode into inline edit mode — no separate page. First real `src/actions/` server action in the codebase. New `updateItem(itemId, input)` in `src/actions/items.ts` (`"use server"`, `{ success, data, error }` pattern): `auth()` gate, `updateItemSchema.safeParse`, then scopes the write to the demo user (`getDemoUser()`) to match the app's demo-data pattern. New Zod `updateItemSchema` in `src/lib/validations/item.ts`: title trimmed/non-empty; description/language/url blank-or-whitespace → null via a shared `emptyToNull` preprocess; content nullable but NOT trimmed (preserves code whitespace); url validated with top-level `z.url()` (blank → null); tags `z.array(z.string().trim().min(1))`. New query `updateItem(userId, itemId, data)` in `src/lib/db/items.ts`: findFirst by id+userId as the ownership check (returns null if not owned), `prisma.item.update` with nested tags `deleteMany: {}` then `connectOrCreate` (compound key `userId_name`), returns refreshed `ItemDetail` so the drawer updates without a second fetch. New shadcn-style `src/components/ui/textarea.tsx` (mirrors `input.tsx`; base-ui has no textarea). In `item-drawer.tsx`: `ItemDetailView` gained an `editing` state + `onUpdated` prop (provider passes `setDetail`); Edit button sets editing. New `ItemEditForm` (controlled inputs, no form lib, `useTransition` for pending): Title (required, Save disabled when blank), Description, Tags (comma-separated, split→trim→filter on save); type-gated fields via `CONTENT_TYPES`={snippet,prompt,command,note} (textarea), `LANGUAGE_TYPES`={snippet,command}, and url only for slug `link`; action bar replaced by Save/Cancel; `toast.success`/`toast.error` (Sonner) on result; on success updates drawer detail in place + `router.refresh()` so the card list reflects changes. Type/collection/dates are display-only (not editable). 13 new schema tests in `src/lib/validations/item.test.ts` (28 total pass); the action + Prisma query are left untested per the codebase convention (auth/Prisma-dependent; their only pure logic is the already-covered schema). Build passes; lint clean except the pre-existing `use-mobile.ts` error (untouched). NOTE: shipped without in-browser verification of the edit flow (Edit→fields→Save/Cancel→toast→refresh) — verify when next running the dev server.
