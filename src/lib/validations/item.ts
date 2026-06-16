@@ -29,6 +29,8 @@ export const CREATE_ITEM_TYPES = [
   "command",
   "note",
   "link",
+  "file",
+  "image",
 ] as const;
 
 export const createItemSchema = z
@@ -47,10 +49,27 @@ export const createItemSchema = z
       .preprocess(emptyToNull, z.string().trim().nullable())
       .default(null),
     tags: z.array(z.string().trim().min(1)).default([]),
+    // File upload fields (file/image types only)
+    fileUrl: z
+      .preprocess(emptyToNull, z.string().nullable())
+      .default(null),
+    fileName: z
+      .preprocess(emptyToNull, z.string().nullable())
+      .default(null),
+    fileSize: z.number().int().positive().nullable().default(null),
+    mimeType: z
+      .preprocess(emptyToNull, z.string().nullable())
+      .default(null),
   })
   .refine((data) => data.typeSlug !== "link" || data.url !== null, {
     message: "URL is required for links.",
     path: ["url"],
-  });
+  })
+  .refine(
+    (data) =>
+      (data.typeSlug !== "file" && data.typeSlug !== "image") ||
+      data.fileUrl !== null,
+    { message: "A file must be uploaded.", path: ["fileUrl"] },
+  );
 
 export type CreateItemInput = z.infer<typeof createItemSchema>;

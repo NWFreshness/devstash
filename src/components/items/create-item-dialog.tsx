@@ -16,6 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { FileUpload, type UploadedFile } from "@/components/ui/file-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -31,6 +32,12 @@ import { MarkdownEditor } from "@/components/ui/markdown-editor";
 const CONTENT_TYPES = new Set(["snippet", "prompt", "command", "note"]);
 const LANGUAGE_TYPES = new Set(["snippet", "command"]);
 const MARKDOWN_TYPES = new Set(["prompt", "note"]);
+const FILE_TYPES = new Set(["file", "image"]);
+
+const IMAGE_ACCEPT =
+  ".png,.jpg,.jpeg,.gif,.webp,.svg,image/png,image/jpeg,image/gif,image/webp,image/svg+xml";
+const FILE_ACCEPT =
+  ".pdf,.txt,.md,.json,.yaml,.yml,.xml,.csv,.toml,.ini,application/pdf,text/plain,text/markdown,application/json,text/yaml,text/xml,text/csv";
 
 const TYPE_LABELS: Record<(typeof CREATE_ITEM_TYPES)[number], string> = {
   snippet: "Snippet",
@@ -38,6 +45,8 @@ const TYPE_LABELS: Record<(typeof CREATE_ITEM_TYPES)[number], string> = {
   command: "Command",
   note: "Note",
   link: "Link",
+  file: "File",
+  image: "Image",
 };
 
 interface CreateItemDialogProps {
@@ -61,10 +70,12 @@ export function CreateItemDialog({
   const [language, setLanguage] = useState("");
   const [url, setUrl] = useState("");
   const [tags, setTags] = useState("");
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
 
   const showContent = CONTENT_TYPES.has(typeSlug);
   const showLanguage = LANGUAGE_TYPES.has(typeSlug);
   const showUrl = typeSlug === "link";
+  const showFileUpload = FILE_TYPES.has(typeSlug);
 
   function reset() {
     setTypeSlug(defaultType);
@@ -74,7 +85,14 @@ export function CreateItemDialog({
     setLanguage("");
     setUrl("");
     setTags("");
+    setUploadedFile(null);
   }
+
+  const canCreate =
+    !pending &&
+    title.trim() !== "" &&
+    (!showUrl || url !== "") &&
+    (!showFileUpload || uploadedFile !== null);
 
   function save() {
     startTransition(async () => {
@@ -85,6 +103,10 @@ export function CreateItemDialog({
         content: showContent ? content : null,
         language: showLanguage ? language : null,
         url: showUrl ? url : null,
+        fileUrl: uploadedFile?.key ?? null,
+        fileName: uploadedFile?.fileName ?? null,
+        fileSize: uploadedFile?.fileSize ?? null,
+        mimeType: uploadedFile?.mimeType ?? null,
         tags: tags
           .split(",")
           .map((t) => t.trim())
@@ -165,6 +187,19 @@ export function CreateItemDialog({
             />
           </div>
 
+          {showFileUpload && (
+            <div className="space-y-2">
+              <Label>File</Label>
+              <FileUpload
+                accept={typeSlug === "image" ? IMAGE_ACCEPT : FILE_ACCEPT}
+                maxBytes={typeSlug === "image" ? 5 * 1024 * 1024 : 10 * 1024 * 1024}
+                uploaded={uploadedFile}
+                onUpload={setUploadedFile}
+                onClear={() => setUploadedFile(null)}
+              />
+            </div>
+          )}
+
           {showContent && (
             <div className="space-y-2">
               <Label>Content</Label>
@@ -222,7 +257,7 @@ export function CreateItemDialog({
           >
             Cancel
           </Button>
-          <Button onClick={save} disabled={pending || title.trim() === ""}>
+          <Button onClick={save} disabled={!canCreate}>
             {pending ? "Creating..." : "Create"}
           </Button>
         </DialogFooter>

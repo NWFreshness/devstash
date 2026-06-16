@@ -91,6 +91,10 @@ export interface ItemDetail {
   content: string | null;
   language: string | null;
   url: string | null;
+  fileUrl: string | null;
+  fileName: string | null;
+  fileSize: number | null;
+  mimeType: string | null;
   isFavorite: boolean;
   isPinned: boolean;
   type: { name: string; slug: string; icon: string | null; color: string | null };
@@ -123,6 +127,10 @@ export async function getItemDetail(
     content: item.content,
     language: item.language,
     url: item.url,
+    fileUrl: item.fileUrl,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
+    mimeType: item.mimeType,
     isFavorite: item.isFavorite,
     isPinned: item.isPinned,
     type: item.type,
@@ -145,6 +153,7 @@ export async function createItem(
   });
   if (!type) return null;
 
+  const isFileType = data.typeSlug === "file" || data.typeSlug === "image";
   const item = await prisma.item.create({
     data: {
       title: data.title,
@@ -152,7 +161,11 @@ export async function createItem(
       content: data.content,
       url: data.url,
       language: data.language,
-      contentType: "text",
+      contentType: isFileType ? "file" : "text",
+      fileUrl: data.fileUrl,
+      fileName: data.fileName,
+      fileSize: data.fileSize,
+      mimeType: data.mimeType,
       userId,
       typeId: type.id,
       tags: {
@@ -214,14 +227,18 @@ export async function updateItem(
 export async function deleteItem(
   userId: string | null,
   itemId: string,
-): Promise<boolean> {
-  if (!userId) return false;
+): Promise<{ deleted: boolean; fileUrl: string | null }> {
+  if (!userId) return { deleted: false, fileUrl: null };
 
-  // Scope by userId so the delete is the ownership check; ItemTag rows cascade.
-  const { count } = await prisma.item.deleteMany({
+  // Grab fileUrl before deletion so the caller can clean up B2.
+  const existing = await prisma.item.findFirst({
     where: { id: itemId, userId },
+    select: { fileUrl: true },
   });
-  return count > 0;
+  if (!existing) return { deleted: false, fileUrl: null };
+
+  await prisma.item.delete({ where: { id: itemId } });
+  return { deleted: true, fileUrl: existing.fileUrl };
 }
 
 export interface DashboardStats {

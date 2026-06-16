@@ -1,6 +1,9 @@
 "use server";
 
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+
 import { auth } from "@/auth";
+import { b2, B2_BUCKET } from "@/lib/b2";
 import {
   createItem as createItemQuery,
   deleteItem as deleteItemQuery,
@@ -75,9 +78,17 @@ export async function deleteItem(
 
   // Items are seeded under the demo user, matching the rest of the app.
   const demoUser = await getDemoUser();
-  const deleted = await deleteItemQuery(demoUser?.id ?? null, itemId);
-  if (!deleted) {
+  const result = await deleteItemQuery(demoUser?.id ?? null, itemId);
+  if (!result.deleted) {
     return { success: false, error: "Item not found." };
+  }
+
+  if (result.fileUrl) {
+    await b2
+      .send(new DeleteObjectCommand({ Bucket: B2_BUCKET, Key: result.fileUrl }))
+      .catch(() => {
+        // B2 deletion is best-effort; DB row is already gone.
+      });
   }
 
   return { success: true };
