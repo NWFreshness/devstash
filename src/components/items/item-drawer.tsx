@@ -38,10 +38,12 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { CodeEditor } from "@/components/ui/code-editor";
+import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { iconByName } from "@/components/dashboard/type-icons";
 
 const CONTENT_TYPES = new Set(["snippet", "prompt", "command", "note"]);
 const LANGUAGE_TYPES = new Set(["snippet", "command"]);
+const MARKDOWN_TYPES = new Set(["prompt", "note"]);
 
 const FALLBACK_COLOR = "var(--muted-foreground)";
 
@@ -274,6 +276,8 @@ function ItemDetailView({
                 language={detail.language ?? undefined}
                 readOnly
               />
+            ) : MARKDOWN_TYPES.has(detail.type.slug) ? (
+              <MarkdownEditor value={detail.content} readOnly />
             ) : (
               <pre className="overflow-x-auto rounded-md border bg-muted/40 p-3 text-xs">
                 <code>{detail.content}</code>
@@ -433,6 +437,8 @@ function ItemEditForm({
                 onChange={setContent}
                 language={language || undefined}
               />
+            ) : MARKDOWN_TYPES.has(detail.type.slug) ? (
+              <MarkdownEditor value={content} onChange={setContent} />
             ) : (
               <Textarea
                 id="edit-content"

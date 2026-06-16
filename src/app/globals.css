@@ -128,3 +128,105 @@
     @apply font-sans;
     }
 }
+
+.markdown-preview {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--foreground);
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.markdown-preview h1,
+.markdown-preview h2,
+.markdown-preview h3,
+.markdown-preview h4,
+.markdown-preview h5,
+.markdown-preview h6 {
+  font-weight: 600;
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+.markdown-preview h1 { font-size: 1.5em; }
+.markdown-preview h2 { font-size: 1.25em; }
+.markdown-preview h3 { font-size: 1.1em; }
+.markdown-preview h4,
+.markdown-preview h5,
+.markdown-preview h6 { font-size: 1em; }
+
+.markdown-preview p {
+  margin-top: 0;
+  margin-bottom: 0.75em;
+}
+
+.markdown-preview ul,
+.markdown-preview ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.75em;
+}
+.markdown-preview ul { list-style-type: disc; }
+.markdown-preview ol { list-style-type: decimal; }
+.markdown-preview li { margin-bottom: 0.25em; }
+
+.markdown-preview code {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85em;
+  padding: 0.15em 0.4em;
+  border-radius: 0.25em;
+  background: oklch(1 0 0 / 10%);
+}
+
+.markdown-preview pre {
+  background: oklch(0.145 0 0 / 80%);
+  border: 1px solid oklch(1 0 0 / 10%);
+  border-radius: 0.375em;
+  padding: 0.875em 1em;
+  overflow-x: auto;
+  margin-bottom: 0.75em;
+}
+.markdown-preview pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.8125em;
+}
+
+.markdown-preview blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 0.875em;
+  margin-left: 0;
+  margin-bottom: 0.75em;
+  color: var(--muted-foreground);
+}
+
+.markdown-preview a {
+  color: oklch(0.6 0.2 250);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.markdown-preview a:hover {
+  color: oklch(0.7 0.2 250);
+}
+
+.markdown-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.75em;
+  font-size: 0.875em;
+}
+.markdown-preview th,
+.markdown-preview td {
+  border: 1px solid oklch(1 0 0 / 15%);
+  padding: 0.375em 0.75em;
+  text-align: left;
+}
+.markdown-preview th {
+  background: oklch(1 0 0 / 8%);
+  font-weight: 600;
+}
+
+.markdown-preview hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1em 0;
+}

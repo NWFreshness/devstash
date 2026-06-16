@@ -26,9 +26,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { MarkdownEditor } from "@/components/ui/markdown-editor";
 
 const CONTENT_TYPES = new Set(["snippet", "prompt", "command", "note"]);
 const LANGUAGE_TYPES = new Set(["snippet", "command"]);
+const MARKDOWN_TYPES = new Set(["prompt", "note"]);
 
 const TYPE_LABELS: Record<(typeof CREATE_ITEM_TYPES)[number], string> = {
   snippet: "Snippet",
@@ -165,13 +167,17 @@ export function CreateItemDialog({
 
           {showContent && (
             <div className="space-y-2">
-              <Label htmlFor="create-content">Content</Label>
-              <Textarea
-                id="create-content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="min-h-40 font-mono text-xs"
-              />
+              <Label>Content</Label>
+              {MARKDOWN_TYPES.has(typeSlug) ? (
+                <MarkdownEditor value={content} onChange={setContent} />
+              ) : (
+                <Textarea
+                  id="create-content"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="min-h-40 font-mono text-xs"
+                />
+              )}
             </div>
           )}
 
