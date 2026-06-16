@@ -7,6 +7,7 @@ export interface ItemWithMeta {
   description: string | null;
   isPinned: boolean;
   isFavorite: boolean;
+  fileUrl: string | null;
   createdAt: Date;
   type: { slug: string; icon: string | null; color: string | null };
   tags: string[];
@@ -18,6 +19,7 @@ function shape(item: {
   description: string | null;
   isPinned: boolean;
   isFavorite: boolean;
+  fileUrl: string | null;
   createdAt: Date;
   type: { slug: string; icon: string | null; color: string | null };
   tags: { tag: { name: string } }[];
@@ -28,6 +30,7 @@ function shape(item: {
     description: item.description,
     isPinned: item.isPinned,
     isFavorite: item.isFavorite,
+    fileUrl: item.fileUrl,
     createdAt: item.createdAt,
     type: item.type,
     tags: item.tags.map((t) => t.tag.name),
