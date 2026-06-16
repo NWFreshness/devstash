@@ -68,7 +68,7 @@ export function MarkdownEditor({
         <Textarea
           value={value}
           onChange={(e) => onChange?.(e.target.value)}
-          className="min-h-[120px] max-h-[400px] resize-none rounded-none border-0 bg-[#1e1e1e] font-mono text-xs text-white/90 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="markdown-editor-textarea min-h-[120px] max-h-[400px] resize-none rounded-none border-0 bg-[#1e1e1e] font-mono text-xs text-white/90 focus-visible:ring-0 focus-visible:ring-offset-0"
           placeholder="Write markdown..."
         />
       ) : (

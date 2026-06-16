@@ -135,6 +135,40 @@
   color: var(--foreground);
   overflow-y: auto;
   max-height: 400px;
+  scrollbar-width: thin;
+  scrollbar-color: oklch(1 0 0 / 20%) transparent;
+}
+
+.markdown-preview::-webkit-scrollbar {
+  width: 6px;
+}
+.markdown-preview::-webkit-scrollbar-track {
+  background: transparent;
+}
+.markdown-preview::-webkit-scrollbar-thumb {
+  background: oklch(1 0 0 / 20%);
+  border-radius: 3px;
+}
+.markdown-preview::-webkit-scrollbar-thumb:hover {
+  background: oklch(1 0 0 / 35%);
+}
+
+.markdown-editor-textarea {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(1 0 0 / 20%) transparent;
+}
+.markdown-editor-textarea::-webkit-scrollbar {
+  width: 6px;
+}
+.markdown-editor-textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+.markdown-editor-textarea::-webkit-scrollbar-thumb {
+  background: oklch(1 0 0 / 20%);
+  border-radius: 3px;
+}
+.markdown-editor-textarea::-webkit-scrollbar-thumb:hover {
+  background: oklch(1 0 0 / 35%);
 }
 
 .markdown-preview h1,
