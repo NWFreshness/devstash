@@ -40,6 +40,7 @@ export async function getSidebarCollections(
   const cols = await prisma.collection.findMany({
     where: { userId },
     orderBy: { updatedAt: "desc" },
+    take: 50,
     include: {
       items: {
         select: { type: { select: { color: true } } },

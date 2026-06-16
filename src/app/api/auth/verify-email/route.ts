@@ -10,17 +10,24 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL("/sign-in?error=invalid-token", origin));
   }
 
-  let record;
+  // Check expiry before consuming the token so an expired token is not silently discarded.
+  const record = await prisma.verificationToken.findUnique({
+    where: { identifier_token: { identifier: email, token } },
+  });
+  if (!record) {
+    return NextResponse.redirect(new URL("/sign-in?error=invalid-token", origin));
+  }
+  if (record.expires < new Date()) {
+    return NextResponse.redirect(new URL("/sign-in?error=token-expired", origin));
+  }
+
   try {
-    record = await prisma.verificationToken.delete({
+    await prisma.verificationToken.delete({
       where: { identifier_token: { identifier: email, token } },
     });
   } catch {
+    // Token was already consumed by a concurrent request — treat as invalid.
     return NextResponse.redirect(new URL("/sign-in?error=invalid-token", origin));
-  }
-
-  if (record.expires < new Date()) {
-    return NextResponse.redirect(new URL("/sign-in?error=token-expired", origin));
   }
 
   await prisma.user.update({

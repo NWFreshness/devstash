@@ -57,11 +57,15 @@ export function FileUpload({
 
     xhr.onload = () => {
       setProgress(null);
-      if (xhr.status === 200) {
-        onUpload(JSON.parse(xhr.responseText) as UploadedFile);
-      } else {
-        const body = JSON.parse(xhr.responseText) as { error?: string };
-        setError(body.error ?? "Upload failed");
+      try {
+        if (xhr.status === 200) {
+          onUpload(JSON.parse(xhr.responseText) as UploadedFile);
+        } else {
+          const body = JSON.parse(xhr.responseText) as { error?: string };
+          setError(body.error ?? "Upload failed");
+        }
+      } catch {
+        setError("Upload failed");
       }
     };
 

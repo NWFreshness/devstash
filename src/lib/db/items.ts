@@ -91,6 +91,7 @@ export async function getItemsByType(
   const items = await prisma.item.findMany({
     where: { userId, type: { slug: typeSlug } },
     orderBy: { createdAt: "desc" },
+    take: 200,
     include: {
       type: { select: { slug: true, icon: true, color: true } },
       tags: { include: { tag: { select: { name: true } } } },

@@ -18,15 +18,18 @@ export async function POST(req: NextRequest) {
 
   const { token, password } = parsed.data;
 
-  // Delete-first atomicity: prevents concurrent claims of the same token.
+  // Atomic claim: find and delete in a single transaction to prevent concurrent use.
   let record;
   try {
-    record = await prisma.verificationToken.findFirst({
-      where: { token, identifier: { startsWith: "reset:" } },
-    });
-    if (!record) throw new Error("not found");
-    await prisma.verificationToken.delete({
-      where: { identifier_token: { identifier: record.identifier, token } },
+    record = await prisma.$transaction(async (tx) => {
+      const r = await tx.verificationToken.findFirst({
+        where: { token, identifier: { startsWith: "reset:" } },
+      });
+      if (!r) throw new Error("not found");
+      await tx.verificationToken.delete({
+        where: { identifier_token: { identifier: r.identifier, token } },
+      });
+      return r;
     });
   } catch {
     return NextResponse.json({ error: "Invalid or expired reset link." }, { status: 400 });

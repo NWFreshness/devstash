@@ -18,6 +18,10 @@ export async function GET(
   const { path } = await params;
   const key = path.join("/");
 
+  if (!key.startsWith("uploads/")) {
+    return new NextResponse("Not found", { status: 404 });
+  }
+
   // Verify the authenticated user owns an item with this key.
   const demoUser = await getDemoUser();
   const item = await prisma.item.findFirst({
