@@ -1,6 +1,6 @@
 "use client";
 
-import { Folder, Pin, Star } from "lucide-react";
+import { Copy, Folder, Pin, Star } from "lucide-react";
 
 import type { ItemWithMeta } from "@/lib/db/items";
 import { Badge } from "@/components/ui/badge";
@@ -22,11 +22,18 @@ export function ItemRow({ item }: { item: ItemWithMeta }) {
   const Icon = iconByName[item.type.icon ?? ""] ?? Folder;
   const color = item.type.color ?? FALLBACK_COLOR;
   const openItem = useItemDrawer();
+
+  function handleCopy(e: React.MouseEvent) {
+    e.stopPropagation();
+    const text = item.content ?? item.url ?? item.title;
+    navigator.clipboard.writeText(text);
+  }
+
   return (
     <button
       type="button"
       onClick={() => openItem(item.id)}
-      className="flex w-full items-start gap-3 rounded-lg border-l-2 p-3 text-left ring-1 ring-foreground/10 transition-colors hover:bg-muted/50"
+      className="group flex w-full items-start gap-3 rounded-lg border-l-2 p-3 text-left ring-1 ring-foreground/10 transition-colors hover:bg-muted/50"
       style={{ borderLeftColor: color }}
     >
       <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
@@ -41,6 +48,14 @@ export function ItemRow({ item }: { item: ItemWithMeta }) {
           {item.isFavorite && (
             <Star className="size-3.5 shrink-0 fill-amber-400 text-amber-400" />
           )}
+          <button
+            type="button"
+            onClick={handleCopy}
+            aria-label="Copy"
+            className="ml-auto rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
+          >
+            <Copy className="size-3.5" />
+          </button>
         </div>
         {item.description && (
           <p className="truncate text-sm text-muted-foreground">

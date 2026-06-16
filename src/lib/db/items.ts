@@ -5,6 +5,8 @@ export interface ItemWithMeta {
   id: string;
   title: string;
   description: string | null;
+  content: string | null;
+  url: string | null;
   isPinned: boolean;
   isFavorite: boolean;
   fileUrl: string | null;
@@ -19,6 +21,8 @@ function shape(item: {
   id: string;
   title: string;
   description: string | null;
+  content: string | null;
+  url: string | null;
   isPinned: boolean;
   isFavorite: boolean;
   fileUrl: string | null;
@@ -32,6 +36,8 @@ function shape(item: {
     id: item.id,
     title: item.title,
     description: item.description,
+    content: item.content,
+    url: item.url,
     isPinned: item.isPinned,
     isFavorite: item.isFavorite,
     fileUrl: item.fileUrl,
