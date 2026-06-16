@@ -38,13 +38,21 @@ const TYPE_LABELS: Record<(typeof CREATE_ITEM_TYPES)[number], string> = {
   link: "Link",
 };
 
-export function CreateItemDialog() {
+interface CreateItemDialogProps {
+  defaultType?: (typeof CREATE_ITEM_TYPES)[number];
+  triggerElement?: React.ReactElement;
+}
+
+export function CreateItemDialog({
+  defaultType = "snippet",
+  triggerElement,
+}: CreateItemDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const [typeSlug, setTypeSlug] =
-    useState<(typeof CREATE_ITEM_TYPES)[number]>("snippet");
+    useState<(typeof CREATE_ITEM_TYPES)[number]>(defaultType);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [content, setContent] = useState("");
@@ -57,7 +65,7 @@ export function CreateItemDialog() {
   const showUrl = typeSlug === "link";
 
   function reset() {
-    setTypeSlug("snippet");
+    setTypeSlug(defaultType);
     setTitle("");
     setDescription("");
     setContent("");
@@ -102,10 +110,12 @@ export function CreateItemDialog() {
     >
       <DialogTrigger
         render={
-          <Button size="lg">
-            <Plus data-icon="inline-start" />
-            New Item
-          </Button>
+          triggerElement ?? (
+            <Button size="lg">
+              <Plus data-icon="inline-start" />
+              New Item
+            </Button>
+          )
         }
       />
       <DialogContent>

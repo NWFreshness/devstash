@@ -37,6 +37,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { CodeEditor } from "@/components/ui/code-editor";
 import { iconByName } from "@/components/dashboard/type-icons";
 
 const CONTENT_TYPES = new Set(["snippet", "prompt", "command", "note"]);
@@ -267,9 +268,17 @@ function ItemDetailView({
 
         {detail.content && (
           <Section title="Content">
-            <pre className="overflow-x-auto rounded-md border bg-muted/40 p-3 text-xs">
-              <code>{detail.content}</code>
-            </pre>
+            {LANGUAGE_TYPES.has(detail.type.slug) ? (
+              <CodeEditor
+                value={detail.content}
+                language={detail.language ?? undefined}
+                readOnly
+              />
+            ) : (
+              <pre className="overflow-x-auto rounded-md border bg-muted/40 p-3 text-xs">
+                <code>{detail.content}</code>
+              </pre>
+            )}
           </Section>
         )}
 
@@ -417,13 +426,21 @@ function ItemEditForm({
 
         {showContent && (
           <div className="space-y-2">
-            <Label htmlFor="edit-content">Content</Label>
-            <Textarea
-              id="edit-content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="min-h-40 font-mono text-xs"
-            />
+            <Label>Content</Label>
+            {showLanguage ? (
+              <CodeEditor
+                value={content}
+                onChange={setContent}
+                language={language || undefined}
+              />
+            ) : (
+              <Textarea
+                id="edit-content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="min-h-40 font-mono text-xs"
+              />
+            )}
           </div>
         )}
 

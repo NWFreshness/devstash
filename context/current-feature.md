@@ -1,12 +1,23 @@
-# Current Feature
+# Current Feature: Code Editor
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Monaco Editor component with dark theme for snippets and commands (display + edit modes)
+- macOS-style window dots (red/yellow/green) in the editor header
+- Quick copy button in editor header alongside the language label
+- Fluid height with a max of 400px and a styled scrollbar matching the theme
+- Textarea preserved for notes, prompts, and other non-code types
+
 ## Notes
+
+- Use Monaco Editor (`@monaco-editor/react` or similar)
+- Applies to item types with slugs `snippet` and `command` only — same `CONTENT_TYPES` / `LANGUAGE_TYPES` gating already in the drawer and create dialog
+- Must work in both the item drawer view mode (readonly) and edit mode (editable)
+- Replace the `<textarea>` / `<pre>` content block in the drawer with `CodeEditor` for code types
 
 ## History
 
