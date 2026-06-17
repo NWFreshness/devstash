@@ -27,7 +27,11 @@ export default async function DashboardPage() {
         <h2 className="text-lg font-semibold">Recent Collections</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {collections.map((collection) => (
-            <CollectionCard key={collection.id} collection={collection} />
+            <CollectionCard
+              key={collection.id}
+              collection={collection}
+              href={`/collections/${collection.id}`}
+            />
           ))}
         </div>
       </section>

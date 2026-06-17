@@ -80,7 +80,7 @@ function CollectionList({
       <SidebarMenu>
         {collections.map((collection) => (
           <SidebarMenuItem key={collection.id}>
-            <SidebarMenuButton>
+            <SidebarMenuButton render={<Link href={`/collections/${collection.id}`} />}>
               {renderIcon(collection)}
               <span>{collection.name}</span>
             </SidebarMenuButton>

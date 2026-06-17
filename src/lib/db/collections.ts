@@ -103,6 +103,34 @@ export async function getSidebarCollections(
   };
 }
 
+function shapeCollection(col: {
+  id: string;
+  name: string;
+  description: string | null;
+  isFavorite: boolean;
+  items: { type: { slug: string; icon: string | null; color: string | null } }[];
+}): CollectionWithMeta {
+  const primaryType = topByCount(col.items, ({ type }) => type.slug)?.type ?? null;
+  const seen = new Set<string>();
+  const types: CollectionTypeMeta[] = [];
+  for (const { type } of col.items) {
+    if (!seen.has(type.slug)) { seen.add(type.slug); types.push(type); }
+  }
+  return {
+    id: col.id,
+    name: col.name,
+    description: col.description,
+    isFavorite: col.isFavorite,
+    itemCount: col.items.length,
+    primaryType,
+    types,
+  };
+}
+
+const COLLECTION_ITEMS_SELECT = {
+  select: { type: { select: { slug: true, icon: true, color: true } } },
+} as const;
+
 export async function getRecentCollections(
   userId: string | null,
   limit = 6,
@@ -113,30 +141,38 @@ export async function getRecentCollections(
     where: { userId },
     orderBy: { updatedAt: "desc" },
     take: limit,
-    include: {
-      items: {
-        select: {
-          type: { select: { slug: true, icon: true, color: true } },
-        },
-      },
-    },
+    include: { items: COLLECTION_ITEMS_SELECT },
   });
 
-  return cols.map((col) => {
-    const primaryType = topByCount(col.items, ({ type }) => type.slug)?.type ?? null;
-    const seen = new Set<string>();
-    const types: CollectionTypeMeta[] = [];
-    for (const { type } of col.items) {
-      if (!seen.has(type.slug)) { seen.add(type.slug); types.push(type); }
-    }
-    return {
-      id: col.id,
-      name: col.name,
-      description: col.description,
-      isFavorite: col.isFavorite,
-      itemCount: col.items.length,
-      primaryType,
-      types,
-    };
+  return cols.map(shapeCollection);
+}
+
+export async function getAllCollections(
+  userId: string | null,
+): Promise<CollectionWithMeta[]> {
+  if (!userId) return [];
+
+  const cols = await prisma.collection.findMany({
+    where: { userId },
+    orderBy: { name: "asc" },
+    take: 200,
+    include: { items: COLLECTION_ITEMS_SELECT },
   });
+
+  return cols.map(shapeCollection);
+}
+
+export async function getCollectionById(
+  userId: string | null,
+  collectionId: string,
+): Promise<CollectionWithMeta | null> {
+  if (!userId) return null;
+
+  const col = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    include: { items: COLLECTION_ITEMS_SELECT },
+  });
+  if (!col) return null;
+
+  return shapeCollection(col);
 }

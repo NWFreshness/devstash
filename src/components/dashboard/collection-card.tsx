@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Folder, MoreHorizontal, Star } from "lucide-react";
 
 import type { CollectionWithMeta } from "@/lib/db/collections";
@@ -12,10 +13,18 @@ import {
 } from "@/components/ui/card";
 import { FALLBACK_COLOR } from "@/lib/item-type-sets";
 
-export function CollectionCard({ collection }: { collection: CollectionWithMeta }) {
+export function CollectionCard({
+  collection,
+  href,
+}: {
+  collection: CollectionWithMeta;
+  href?: string;
+}) {
   const accent = collection.primaryType?.color ?? FALLBACK_COLOR;
+  const Wrapper = href ? Link : "div";
 
   return (
+    <Wrapper href={href as string} className={href ? "block" : undefined}>
     <Card
       size="sm"
       className="border-l-2 transition-colors hover:bg-muted/30"
@@ -63,5 +72,6 @@ export function CollectionCard({ collection }: { collection: CollectionWithMeta 
         </div>
       </CardContent>
     </Card>
+    </Wrapper>
   );
 }

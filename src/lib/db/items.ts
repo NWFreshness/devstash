@@ -100,6 +100,24 @@ export async function getItemsByType(
   return items.map(shape);
 }
 
+export async function getItemsByCollection(
+  userId: string | null,
+  collectionId: string,
+): Promise<ItemWithMeta[]> {
+  if (!userId) return [];
+
+  const items = await prisma.item.findMany({
+    where: { userId, collectionId },
+    orderBy: { createdAt: "desc" },
+    take: 200,
+    include: {
+      type: { select: { slug: true, icon: true, color: true } },
+      tags: { include: { tag: { select: { name: true } } } },
+    },
+  });
+  return items.map(shape);
+}
+
 export interface ItemDetail {
   id: string;
   title: string;
