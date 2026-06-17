@@ -8,6 +8,7 @@ import { FALLBACK_COLOR } from "@/lib/item-type-sets";
 import { ItemCard } from "@/components/items/item-card";
 import { ImageThumbnailCard } from "@/components/items/image-thumbnail-card";
 import { FileListRow } from "@/components/items/file-list-row";
+import { CollectionDetailActions } from "@/components/collections/collection-detail-actions";
 
 export default async function CollectionPage({
   params,
@@ -34,21 +35,24 @@ export default async function CollectionPage({
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
-      <div className="flex items-center gap-3">
-        <div className="flex size-10 items-center justify-center rounded-md bg-muted">
-          <Folder className="size-5" style={{ color: accent }} />
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-md bg-muted">
+            <Folder className="size-5" style={{ color: accent }} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {collection.name}
+            </h1>
+            {collection.description && (
+              <p className="text-muted-foreground">{collection.description}</p>
+            )}
+            <p className="text-sm text-muted-foreground">
+              {items.length} {items.length === 1 ? "item" : "items"}
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {collection.name}
-          </h1>
-          {collection.description && (
-            <p className="text-muted-foreground">{collection.description}</p>
-          )}
-          <p className="text-sm text-muted-foreground">
-            {items.length} {items.length === 1 ? "item" : "items"}
-          </p>
-        </div>
+        <CollectionDetailActions collection={collection} />
       </div>
 
       {items.length === 0 ? (
