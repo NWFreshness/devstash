@@ -1,8 +1,8 @@
-import { FolderPlus, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
 import { CreateItemDialog } from "@/components/items/create-item-dialog";
 
 /** Dashboard top bar. Search is display only; the trigger toggles the sidebar. */
@@ -24,10 +24,7 @@ export function TopBar() {
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-        <Button variant="outline" size="lg">
-          <FolderPlus data-icon="inline-start" />
-          New Collection
-        </Button>
+        <CreateCollectionDialog />
         <CreateItemDialog />
       </div>
     </header>

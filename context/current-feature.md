@@ -1,12 +1,26 @@
-# Current Feature
+# Current Feature: Collection Create
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Add a "New Collection" button to the top bar (alongside the existing "New Item" button)
+- Clicking the button opens a modal dialog with Name (required) and Description (optional) fields
+- On save, call a server action / API route that creates the collection scoped to the current user
+- Show a success toast and close the modal on success; show an error toast on failure
+- Refresh the page/list after creation so the new collection appears in the sidebar and any collections view without a full page reload
+
 ## Notes
+
+- Follow the same patterns as Item Create: modal dialog, controlled inputs, `useTransition` for pending state, `router.refresh()` after success
+- Collections are user-scoped — all DB queries must scope by `userId` (use `getDemoUser()` consistent with the rest of the app)
+- Server-side: new `createCollection` query in `src/lib/db/collections.ts` and a `createCollection` server action in `src/actions/collections.ts`
+- Validation: Zod schema in `src/lib/validations/collection.ts` (name trimmed/non-empty, description optional blank→null)
+- Dialog component: reuse the existing `src/components/ui/dialog.tsx` pattern; new client component `src/components/collections/create-collection-dialog.tsx`
+- Top bar is a server component (`top-bar.tsx`) — inject the new dialog as a client island, same as `CreateItemDialog`
+- No new shadcn components should be needed (dialog, input, textarea, button already exist)
 
 ## History
 

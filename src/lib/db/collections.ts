@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { CreateCollectionInput } from "@/lib/validations/collection";
 
 /** Returns the item with the highest occurrence count, or null if empty. */
 function topByCount<T>(items: T[], key: (item: T) => string | null): T | null {
@@ -47,6 +48,17 @@ export interface SidebarCollection {
 export interface SidebarCollections {
   favorites: SidebarCollection[];
   recents: SidebarCollection[];
+}
+
+export async function createCollection(
+  userId: string | null,
+  data: CreateCollectionInput,
+): Promise<{ id: string; name: string } | null> {
+  if (!userId) return null;
+  return prisma.collection.create({
+    data: { userId, name: data.name, description: data.description },
+    select: { id: true, name: true },
+  });
 }
 
 export async function getSidebarCollections(
