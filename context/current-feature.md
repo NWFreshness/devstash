@@ -1,28 +1,18 @@
-# Code Decomposition Refactor
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Extract `formatBytes` shared utility to `src/lib/utils.ts` (removes duplication in `file-upload.tsx` and `file-list-row.tsx`)
-- Move `FALLBACK_COLOR` constant to `src/lib/item-type-sets.ts` (removes 5-file duplication)
-- Extract `parseTags` utility to `src/lib/utils.ts` (removes duplication in `create-item-dialog.tsx` and `item-edit-form.tsx`)
-- Extract `ItemActionBar` component to `src/components/items/item-action-bar.tsx` (decouples action bar + delete dialog from `ItemDetailView`)
-- Extract `ItemFormFields` component to `src/components/items/item-fields.tsx` (removes duplicated type-gated field markup across create and edit)
-- Extract local `CollectionList` function component in `app-sidebar.tsx` (removes duplicated favorites/recents list scaffolding)
-- Extract `topByCount` private helper in `collections.ts` (removes duplicated primary-color algorithm)
-
 ## Notes
-
-- Pure refactor — no behavior changes, no new features
-- All existing tests must stay green
-- Build must pass after all changes
 
 ## History
 
 <!-- Keep this updated. Earliest to latest -->
+
+- Code Decomposition Refactor: `formatBytes` and `parseTags` extracted to `src/lib/utils.ts`; `FALLBACK_COLOR` moved to `src/lib/item-type-sets.ts` (removed from 5 files); `ItemActionBar` extracted to `src/components/items/item-action-bar.tsx`; shared `ItemFormFields` extracted to `src/components/items/item-fields.tsx` (used by both `CreateItemDialog` and `ItemEditForm`); local `CollectionList` function component extracted in `app-sidebar.tsx`; `topByCount<T>` private helper extracted in `collections.ts`. Pure refactor — no behavior changes. 34 tests green, build passes.
 
 - File & Image Upload (BackBlaze B2): new `src/lib/b2.ts` (S3Client singleton, `forcePathStyle: true`). `POST /api/upload` validates MIME type (5 allowed image types, 10 file types) and size (5 MB images / 10 MB files), uploads to B2, returns `{ key, fileName, fileSize, mimeType }`. `GET /api/download/[...path]` is auth-gated and ownership-checked via demo user; streams from B2 with `Content-Disposition: inline` for images and `attachment` for files. New `src/components/ui/file-upload.tsx`: drag-and-drop zone, XHR with `upload.onprogress` bar, instant client-side size check, remove button after upload. `CREATE_ITEM_TYPES` extended to include `"file"` and `"image"`; `createItemSchema` gained `fileUrl/fileName/fileSize/mimeType` fields with a `.refine` requiring `fileUrl` for file/image types. `createItem` DB query sets `contentType: "file"` and stores file metadata. `deleteItem` DB query now returns `{ deleted, fileUrl }` so the server action can fire `DeleteObjectCommand` (best-effort, `.catch` swallowed) after the DB row is gone. `CreateItemDialog` shows `FileUpload` when type is file/image; Create button blocked until upload completes. `ItemDrawer` view mode: image type shows `<img>` via proxy URL in a Preview section; file type shows filename+size row in a File section; both get a Download button in the action bar. B2 credentials (`B2_KEY_ID`, `B2_APPLICATION_KEY`, `B2_BUCKET_NAME=tm-devstash`, `B2_REGION=us-west-004`, `B2_ENDPOINT`) added to `.env`, `.env.production`, and `.env.example`. `next.config.ts` sets `serverActions.bodySizeLimit: "11mb"`. Dependency added: `@aws-sdk/client-s3`. Build passes; 34 tests still green; verified in-browser (image upload → B2 → drawer preview + download link correct).
 
