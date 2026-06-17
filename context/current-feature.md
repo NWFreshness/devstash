@@ -1,27 +1,12 @@
-# Current Feature: Editor Preferences Settings
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Font size dropdown in settings page
-- Tab size dropdown in settings page
-- Word wrap toggle (default: on)
-- Minimap toggle (default: off)
-- Theme dropdown: vs-dark, monokai, github-dark (default: vs-dark)
-- Store preferences in JSON column `editorPreferences` on User model (via migration, not db push)
-- Server action to update preferences (auto-save on change, no save button)
-- Success toast on save
-- Apply settings to Monaco `CodeEditor` component
-- `EditorPreferencesContext` to share preferences with client components
-
 ## Notes
-
-- Migration required — use `prisma migrate dev`, never `db push`
-- Auto-save means each control change triggers a debounced/immediate save
-- Settings page already exists at `/settings`; add a new section there
 
 ## History
 
@@ -78,3 +63,5 @@ In Progress
 - Global Search / Command Palette: Ctrl+K / Cmd+K opens a `cmdk`-powered command palette with client-side fuzzy search across all items and collections. New `src/components/search/command-palette.tsx` (`CommandDialog` with backdrop, search input, Items + Collections groups, type icon badges, item count); new `src/components/search/search-trigger.tsx` (client button + keyboard shortcut handler, renders palette). `TopBar` replaced the static readonly input with `SearchTrigger`; TopBar moved inside `ItemDrawerProvider` in `AppShell` so the palette can call `useItemDrawer` — selecting an item opens the drawer, selecting a collection navigates to `/collections/[id]`. Two new lean DB helpers: `getSearchItems(userId)` (id, title, type; up to 500, ordered by updatedAt) in `items.ts` and `getSearchCollections(userId)` (id, name, itemCount; up to 200) in `collections.ts`; both fetched by `AppShell` and threaded to `TopBar`. Dependency added: `cmdk@1.1.1`. No new unit tests (React components only; no pure logic). 36 tests still green; build passes; verified in-browser (click trigger, Ctrl+K shortcut, fuzzy filter, arrow key navigation, Enter selects → drawer or collection page, "No results found" empty state).
 
 - Settings Page: new `/settings` page (auth-protected via proxy matcher) with Change Password form (visible only for email/password users) and Delete Account AlertDialog. "Settings" link added to the user icon `DropdownMenu` in `app-sidebar.tsx` (between Profile and Sign out). Both account actions moved from `/profile` to `/settings`; `/profile` now shows only the user info card and usage stats card. Settings page is a server component using the existing `getProfileUser` helper — no new DB queries. API routes (`POST /api/profile/change-password`, `DELETE /api/profile`) unchanged. 36 tests still green; build passes.
+
+- Editor Preferences Settings: new `editorPreferences Json?` column on `User` (migration `20260617223954_add_editor_preferences`). Settings page gains an "Editor preferences" card with font size (12–20px), tab size (2/4 spaces), theme (vs-dark/monokai/github-dark), word wrap toggle (default on), and minimap toggle (default off). Each control auto-saves immediately via `updateEditorPreferences` server action (`src/actions/editor-preferences.ts`) with a Sonner success toast — no save button. New `EditorPreferencesProvider` (`src/contexts/editor-preferences-context.tsx`) wraps the `AppShell` content area so client components can read prefs via `useEditorPreferences`. `CodeEditor` reads from context and passes `fontSize`, `tabSize`, `wordWrap`, `minimap`, and `theme` to Monaco. Monokai and GitHub Dark theme JSONs bundled locally at `src/lib/monaco-themes/` (Turbopack workaround for filenames with spaces); registered via Monaco's `beforeMount`. `parseEditorPreferences` helper in `src/types/editor-preferences.ts` safely coerces the DB JSON to a typed struct with defaults. Dependency added: `monaco-themes`. 36 tests still green; build passes. NOTE: shipped without in-browser verification — Turbopack dev server required a cache clear after `prisma generate`; verify on next fresh `npm run dev`.
