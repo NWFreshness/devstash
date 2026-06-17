@@ -1,25 +1,12 @@
-# Current Feature: Settings Page
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- New `/settings` page exists and is auth-protected via proxy
-- Settings link added to the user icon dropdown in the sidebar footer
-- Account section on the settings page contains: Change Password form and Delete Account action
-- Change Password and Delete Account are removed from the `/profile` page
-- `/profile` page retains user info card and usage stats card
-
 ## Notes
-
-- Settings page URL: `/settings`
-- Add "Settings" link to the DropdownMenu in `app-sidebar.tsx` (alongside the existing "Profile" link)
-- Move Change Password form (only shown when `user.password` is set) and Delete Account AlertDialog from `/profile` to `/settings`
-- Settings page is a server component fetching user from DB (same pattern as profile page)
-- Proxy matcher must include `/settings` so unauthenticated users are redirected
-- API routes (`POST /api/profile/change-password`, `DELETE /api/profile`) are unchanged — only the UI moves
 
 ## History
 
@@ -74,3 +61,5 @@ In Progress
 - Collection Actions (Edit, Delete, Favorite): Edit and Delete available from 3-dots dropdown on collection cards (dashboard and `/collections`); Edit, Delete, and visual-only Favorite available from header buttons on `/collections/[id]`. Editing opens a pre-filled `Dialog` modal; deleting shows an `AlertDialog` confirmation. Deleting unassigns items via Prisma `onDelete: SetNull` — items are not deleted. Card body click navigates to collection page; `stopPropagation` on the dropdown trigger area prevents navigation when the menu opens. `<Link>` replaced with `div + router.push()` on `CollectionCard` to make `stopPropagation` work correctly. New `updateCollection` and `deleteCollection` server actions, `updateCollectionSchema` Zod schema, and DB queries. 36 tests still green; build passes; verified in-browser.
 
 - Global Search / Command Palette: Ctrl+K / Cmd+K opens a `cmdk`-powered command palette with client-side fuzzy search across all items and collections. New `src/components/search/command-palette.tsx` (`CommandDialog` with backdrop, search input, Items + Collections groups, type icon badges, item count); new `src/components/search/search-trigger.tsx` (client button + keyboard shortcut handler, renders palette). `TopBar` replaced the static readonly input with `SearchTrigger`; TopBar moved inside `ItemDrawerProvider` in `AppShell` so the palette can call `useItemDrawer` — selecting an item opens the drawer, selecting a collection navigates to `/collections/[id]`. Two new lean DB helpers: `getSearchItems(userId)` (id, title, type; up to 500, ordered by updatedAt) in `items.ts` and `getSearchCollections(userId)` (id, name, itemCount; up to 200) in `collections.ts`; both fetched by `AppShell` and threaded to `TopBar`. Dependency added: `cmdk@1.1.1`. No new unit tests (React components only; no pure logic). 36 tests still green; build passes; verified in-browser (click trigger, Ctrl+K shortcut, fuzzy filter, arrow key navigation, Enter selects → drawer or collection page, "No results found" empty state).
+
+- Settings Page: new `/settings` page (auth-protected via proxy matcher) with Change Password form (visible only for email/password users) and Delete Account AlertDialog. "Settings" link added to the user icon `DropdownMenu` in `app-sidebar.tsx` (between Profile and Sign out). Both account actions moved from `/profile` to `/settings`; `/profile` now shows only the user info card and usage stats card. Settings page is a server component using the existing `getProfileUser` helper — no new DB queries. API routes (`POST /api/profile/change-password`, `DELETE /api/profile`) unchanged. 36 tests still green; build passes.
