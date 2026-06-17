@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { CreateItemInput, UpdateItemInput } from "@/lib/validations/item";
+import { ITEMS_PER_PAGE, COLLECTIONS_PER_PAGE } from "@/lib/pagination";
 
 export interface ItemWithMeta {
   id: string;
@@ -85,37 +86,49 @@ export async function getSystemType(slug: string): Promise<SystemType | null> {
 export async function getItemsByType(
   userId: string | null,
   typeSlug: string,
-): Promise<ItemWithMeta[]> {
-  if (!userId) return [];
+  page = 1,
+): Promise<{ items: ItemWithMeta[]; total: number }> {
+  if (!userId) return { items: [], total: 0 };
 
-  const items = await prisma.item.findMany({
-    where: { userId, type: { slug: typeSlug } },
-    orderBy: { createdAt: "desc" },
-    take: 200,
-    include: {
-      type: { select: { slug: true, icon: true, color: true } },
-      tags: { include: { tag: { select: { name: true } } } },
-    },
-  });
-  return items.map(shape);
+  const where = { userId, type: { slug: typeSlug } };
+  const [items, total] = await Promise.all([
+    prisma.item.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * ITEMS_PER_PAGE,
+      take: ITEMS_PER_PAGE,
+      include: {
+        type: { select: { slug: true, icon: true, color: true } },
+        tags: { include: { tag: { select: { name: true } } } },
+      },
+    }),
+    prisma.item.count({ where }),
+  ]);
+  return { items: items.map(shape), total };
 }
 
 export async function getItemsByCollection(
   userId: string | null,
   collectionId: string,
-): Promise<ItemWithMeta[]> {
-  if (!userId) return [];
+  page = 1,
+): Promise<{ items: ItemWithMeta[]; total: number }> {
+  if (!userId) return { items: [], total: 0 };
 
-  const items = await prisma.item.findMany({
-    where: { userId, collectionId },
-    orderBy: { createdAt: "desc" },
-    take: 200,
-    include: {
-      type: { select: { slug: true, icon: true, color: true } },
-      tags: { include: { tag: { select: { name: true } } } },
-    },
-  });
-  return items.map(shape);
+  const where = { userId, collectionId };
+  const [items, total] = await Promise.all([
+    prisma.item.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * COLLECTIONS_PER_PAGE,
+      take: COLLECTIONS_PER_PAGE,
+      include: {
+        type: { select: { slug: true, icon: true, color: true } },
+        tags: { include: { tag: { select: { name: true } } } },
+      },
+    }),
+    prisma.item.count({ where }),
+  ]);
+  return { items: items.map(shape), total };
 }
 
 export interface ItemDetail {

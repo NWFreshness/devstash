@@ -1,10 +1,17 @@
-# Current Feature
+# Current Feature: Pagination
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
+
+- Add pagination to `/items/[type]` page
+- Add pagination to `/collections/[id]` page
+- Pagination controls at bottom: numbered page links, prev/next (greyed out when unavailable)
+- Constants: `ITEMS_PER_PAGE = 21`, `COLLECTIONS_PER_PAGE = 21`
+- Dashboard constants: `DASHBOARD_COLLECTIONS_LIMIT = 6`, `DASHBOARD_RECENT_ITEMS_LIMIT = 10`
+- Fetch only the current page's data (no loading all records)
 
 ## Notes
 

@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { getCollectionById } from "@/lib/db/collections";
 import { getItemsByCollection } from "@/lib/db/items";
 import { getDemoUser } from "@/lib/db/user";
+import { COLLECTIONS_PER_PAGE, totalPages } from "@/lib/pagination";
 import { FALLBACK_COLOR } from "@/lib/item-type-sets";
+import { Pagination } from "@/components/ui/pagination";
 import { ItemCard } from "@/components/items/item-card";
 import { ImageThumbnailCard } from "@/components/items/image-thumbnail-card";
 import { FileListRow } from "@/components/items/file-list-row";
@@ -12,19 +14,25 @@ import { CollectionDetailActions } from "@/components/collections/collection-det
 
 export default async function CollectionPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) {
   const { id } = await params;
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+
   const user = await getDemoUser();
 
-  const [collection, items] = await Promise.all([
+  const [collection, { items, total }] = await Promise.all([
     getCollectionById(user?.id ?? null, id),
-    getItemsByCollection(user?.id ?? null, id),
+    getItemsByCollection(user?.id ?? null, id, page),
   ]);
 
   if (!collection) notFound();
 
+  const numPages = totalPages(total, COLLECTIONS_PER_PAGE);
   const accent = collection.primaryType?.color ?? FALLBACK_COLOR;
 
   const imageItems = items.filter((i) => i.type.slug === "image");
@@ -48,14 +56,14 @@ export default async function CollectionPage({
               <p className="text-muted-foreground">{collection.description}</p>
             )}
             <p className="text-sm text-muted-foreground">
-              {items.length} {items.length === 1 ? "item" : "items"}
+              {collection.itemCount} {collection.itemCount === 1 ? "item" : "items"}
             </p>
           </div>
         </div>
         <CollectionDetailActions collection={collection} />
       </div>
 
-      {items.length === 0 ? (
+      {collection.itemCount === 0 ? (
         <p className="text-muted-foreground">No items in this collection yet.</p>
       ) : (
         <div className="space-y-8">
@@ -82,6 +90,8 @@ export default async function CollectionPage({
               ))}
             </div>
           )}
+
+          <Pagination page={page} totalPages={numPages} basePath={`/collections/${id}`} />
         </div>
       )}
     </div>

@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 
 import { getItemsByType, getSystemType } from "@/lib/db/items";
 import { getDemoUser } from "@/lib/db/user";
+import { ITEMS_PER_PAGE, totalPages } from "@/lib/pagination";
 import { CREATE_ITEM_TYPES } from "@/lib/validations/item";
 import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
 import { ItemCard } from "@/components/items/item-card";
 import { ImageThumbnailCard } from "@/components/items/image-thumbnail-card";
 import { FileListRow } from "@/components/items/file-list-row";
@@ -14,16 +16,21 @@ import { FALLBACK_COLOR } from "@/lib/item-type-sets";
 
 export default async function ItemsByTypePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ type: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) {
   const { type: typeSlug } = await params;
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
 
   const systemType = await getSystemType(typeSlug);
   if (!systemType) notFound();
 
   const user = await getDemoUser();
-  const items = await getItemsByType(user?.id ?? null, typeSlug);
+  const { items, total } = await getItemsByType(user?.id ?? null, typeSlug, page);
+  const numPages = totalPages(total, ITEMS_PER_PAGE);
 
   const Icon = iconByName[systemType.icon ?? ""] ?? Folder;
   const color = systemType.color ?? FALLBACK_COLOR;
@@ -42,7 +49,7 @@ export default async function ItemsByTypePage({
             {systemType.name}
           </h1>
           <p className="text-muted-foreground">
-            {items.length} item{items.length === 1 ? "" : "s"}
+            {total} item{total === 1 ? "" : "s"}
           </p>
         </div>
         {isCreatable && (
@@ -58,7 +65,7 @@ export default async function ItemsByTypePage({
         )}
       </div>
 
-      {items.length === 0 ? (
+      {total === 0 ? (
         <p className="text-muted-foreground">
           No {systemType.name.toLowerCase()} yet.
         </p>
@@ -81,6 +88,8 @@ export default async function ItemsByTypePage({
           ))}
         </div>
       )}
+
+      <Pagination page={page} totalPages={numPages} basePath={`/items/${typeSlug}`} />
     </div>
   );
 }
