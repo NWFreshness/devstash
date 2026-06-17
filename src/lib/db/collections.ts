@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { CreateCollectionInput } from "@/lib/validations/collection";
+import type { CreateCollectionInput, UpdateCollectionInput } from "@/lib/validations/collection";
 
 /** Returns the item with the highest occurrence count, or null if empty. */
 function topByCount<T>(items: T[], key: (item: T) => string | null): T | null {
@@ -70,6 +70,35 @@ export async function createCollection(
     data: { userId, name: data.name, description: data.description },
     select: { id: true, name: true },
   });
+}
+
+export async function updateCollection(
+  userId: string | null,
+  collectionId: string,
+  data: UpdateCollectionInput,
+): Promise<{ id: string; name: string } | null> {
+  if (!userId) return null;
+  const existing = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    select: { id: true },
+  });
+  if (!existing) return null;
+  return prisma.collection.update({
+    where: { id: collectionId },
+    data: { name: data.name, description: data.description },
+    select: { id: true, name: true },
+  });
+}
+
+export async function deleteCollection(
+  userId: string | null,
+  collectionId: string,
+): Promise<boolean> {
+  if (!userId) return false;
+  const result = await prisma.collection.deleteMany({
+    where: { id: collectionId, userId },
+  });
+  return result.count > 0;
 }
 
 export async function getSidebarCollections(
