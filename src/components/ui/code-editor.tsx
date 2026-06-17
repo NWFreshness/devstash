@@ -1,8 +1,12 @@
 "use client";
 
 import { Copy } from "lucide-react";
-import MonacoEditor from "@monaco-editor/react";
+import MonacoEditor, { type BeforeMount } from "@monaco-editor/react";
 import { toast } from "sonner";
+import MonokaiTheme from "@/lib/monaco-themes/monokai.json";
+import GitHubDarkTheme from "@/lib/monaco-themes/github-dark.json";
+import type { editor } from "monaco-editor";
+import { useEditorPreferences } from "@/contexts/editor-preferences-context";
 
 interface CodeEditorProps {
   value: string;
@@ -11,12 +15,19 @@ interface CodeEditorProps {
   readOnly?: boolean;
 }
 
+const beforeMount: BeforeMount = (monaco) => {
+  monaco.editor.defineTheme("monokai", MonokaiTheme as editor.IStandaloneThemeData);
+  monaco.editor.defineTheme("github-dark", GitHubDarkTheme as editor.IStandaloneThemeData);
+};
+
 export function CodeEditor({
   value,
   onChange,
   language = "plaintext",
   readOnly = false,
 }: CodeEditorProps) {
+  const prefs = useEditorPreferences();
+
   function handleCopy() {
     navigator.clipboard.writeText(value);
     toast.success("Copied to clipboard.");
@@ -50,17 +61,19 @@ export function CodeEditor({
       <MonacoEditor
         value={value}
         language={language}
-        theme="vs-dark"
+        theme={prefs.theme}
+        beforeMount={beforeMount}
         onChange={(val) => onChange?.(val ?? "")}
         options={{
           readOnly,
-          fontSize: 12,
+          fontSize: prefs.fontSize,
+          tabSize: prefs.tabSize,
           fontFamily: "var(--font-mono, monospace)",
-          minimap: { enabled: false },
+          minimap: { enabled: prefs.minimap },
           scrollBeyondLastLine: false,
           lineNumbers: "on",
           folding: false,
-          wordWrap: "on",
+          wordWrap: prefs.wordWrap ? "on" : "off",
           automaticLayout: true,
           padding: { top: 12, bottom: 12 },
           scrollbar: {
@@ -76,7 +89,6 @@ export function CodeEditor({
         className="max-h-[400px]"
         height="auto"
         onMount={(editor) => {
-          // Auto-size up to 400px based on content
           const updateHeight = () => {
             const contentHeight = Math.min(editor.getContentHeight(), 400);
             editor.getContainerDomNode().style.height = `${contentHeight}px`;

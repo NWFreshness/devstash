@@ -7,6 +7,8 @@ import { getItemTypeCounts, getSearchItems } from "@/lib/db/items";
 import { getDemoUser } from "@/lib/db/user";
 import { prisma } from "@/lib/prisma";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { EditorPreferencesProvider } from "@/contexts/editor-preferences-context";
+import { parseEditorPreferences } from "@/types/editor-preferences";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
   // Sidebar footer shows the authenticated user fetched fresh from DB.
@@ -20,7 +22,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       sessionUserId
         ? prisma.user.findUnique({
             where: { id: sessionUserId },
-            select: { name: true, email: true, image: true },
+            select: { name: true, email: true, image: true, editorPreferences: true },
           })
         : null,
       getItemTypeCounts(demoUserId),
@@ -30,6 +32,8 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       getSearchCollections(demoUserId),
     ]);
 
+  const editorPrefs = parseEditorPreferences(authUser?.editorPreferences);
+
   return (
     <SidebarProvider>
       <AppSidebar
@@ -38,14 +42,16 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         collections={collections}
       />
       <SidebarInset>
-        <ItemDrawerProvider collections={collectionsForSelect}>
-          <TopBar
-            collections={collectionsForSelect}
-            searchItems={searchItems}
-            searchCollections={searchCollections}
-          />
-          <div className="flex-1 overflow-auto p-6">{children}</div>
-        </ItemDrawerProvider>
+        <EditorPreferencesProvider prefs={editorPrefs}>
+          <ItemDrawerProvider collections={collectionsForSelect}>
+            <TopBar
+              collections={collectionsForSelect}
+              searchItems={searchItems}
+              searchCollections={searchCollections}
+            />
+            <div className="flex-1 overflow-auto p-6">{children}</div>
+          </ItemDrawerProvider>
+        </EditorPreferencesProvider>
       </SidebarInset>
     </SidebarProvider>
   );
