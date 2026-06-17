@@ -6,15 +6,12 @@ import { toast } from "sonner";
 
 import { updateItem } from "@/actions/items";
 import type { ItemDetail } from "@/lib/db/items";
-import { CONTENT_TYPES, LANGUAGE_TYPES, MARKDOWN_TYPES } from "@/lib/item-type-sets";
+import { CONTENT_TYPES, LANGUAGE_TYPES } from "@/lib/item-type-sets";
+import { parseTags } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
 import { SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { CodeEditor } from "@/components/ui/code-editor";
-import { MarkdownEditor } from "@/components/ui/markdown-editor";
+import { ItemFormFields } from "@/components/items/item-fields";
 
 export function ItemEditForm({
   detail,
@@ -47,10 +44,7 @@ export function ItemEditForm({
         content: showContent ? content : null,
         language: showLanguage ? language : null,
         url: showUrl ? url : null,
-        tags: tags
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean),
+        tags: parseTags(tags),
       });
 
       if (result.success) {
@@ -79,12 +73,7 @@ export function ItemEditForm({
         >
           {pending ? "Saving..." : "Save"}
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onCancel}
-          disabled={pending}
-        >
+        <Button variant="ghost" size="sm" onClick={onCancel} disabled={pending}>
           Cancel
         </Button>
       </div>
@@ -92,77 +81,19 @@ export function ItemEditForm({
       <Separator />
 
       <div className="space-y-5 p-4">
-        <div className="space-y-2">
-          <Label htmlFor="edit-title">Title</Label>
-          <Input
-            id="edit-title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="edit-description">Description</Label>
-          <Textarea
-            id="edit-description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-
-        {showContent && (
-          <div className="space-y-2">
-            <Label>Content</Label>
-            {showLanguage ? (
-              <CodeEditor
-                value={content}
-                onChange={setContent}
-                language={language || undefined}
-              />
-            ) : MARKDOWN_TYPES.has(detail.type.slug) ? (
-              <MarkdownEditor value={content} onChange={setContent} />
-            ) : (
-              <Textarea
-                id="edit-content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="min-h-40 font-mono text-xs"
-              />
-            )}
-          </div>
-        )}
-
-        {showLanguage && (
-          <div className="space-y-2">
-            <Label htmlFor="edit-language">Language</Label>
-            <Input
-              id="edit-language"
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-            />
-          </div>
-        )}
-
-        {showUrl && (
-          <div className="space-y-2">
-            <Label htmlFor="edit-url">URL</Label>
-            <Input
-              id="edit-url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-            />
-          </div>
-        )}
-
-        <div className="space-y-2">
-          <Label htmlFor="edit-tags">Tags</Label>
-          <Input
-            id="edit-tags"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="comma, separated, tags"
-          />
-        </div>
+        <ItemFormFields
+          typeSlug={detail.type.slug}
+          idPrefix="edit"
+          values={{ title, description, content, language, url, tags }}
+          handlers={{
+            onTitleChange: setTitle,
+            onDescriptionChange: setDescription,
+            onContentChange: setContent,
+            onLanguageChange: setLanguage,
+            onUrlChange: setUrl,
+            onTagsChange: setTags,
+          }}
+        />
       </div>
     </>
   );

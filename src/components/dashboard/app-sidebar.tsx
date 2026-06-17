@@ -58,6 +58,40 @@ interface AppSidebarProps {
 
 const PRO_TYPE_SLUGS = new Set(["file", "image"]);
 
+type SidebarCollection = SidebarCollections["favorites"][number];
+
+function CollectionList({
+  label,
+  collections,
+  renderIcon,
+  renderBadge,
+}: {
+  label: string;
+  collections: SidebarCollection[];
+  renderIcon: (collection: SidebarCollection) => React.ReactNode;
+  renderBadge: (collection: SidebarCollection) => React.ReactNode;
+}) {
+  if (collections.length === 0) return null;
+  return (
+    <>
+      <div className="px-2 pt-1 pb-1 text-[0.7rem] font-medium tracking-wide text-sidebar-foreground/50">
+        {label}
+      </div>
+      <SidebarMenu>
+        {collections.map((collection) => (
+          <SidebarMenuItem key={collection.id}>
+            <SidebarMenuButton>
+              {renderIcon(collection)}
+              <span>{collection.name}</span>
+            </SidebarMenuButton>
+            <SidebarMenuBadge>{renderBadge(collection)}</SidebarMenuBadge>
+          </SidebarMenuItem>
+        ))}
+      </SidebarMenu>
+    </>
+  );
+}
+
 const chevron = (
   <ChevronDown className="ml-auto -rotate-90 transition-transform group-data-[panel-open]/clp:rotate-0" />
 );
@@ -120,53 +154,30 @@ export function AppSidebar({ user, itemTypes, collections }: AppSidebarProps) {
             </SidebarGroupLabel>
             <CollapsibleContent>
               <SidebarGroupContent>
-                {favorites.length > 0 && (
-                  <>
-                    <div className="px-2 pt-1 pb-1 text-[0.7rem] font-medium tracking-wide text-sidebar-foreground/50">
-                      Favorites
-                    </div>
-                    <SidebarMenu>
-                      {favorites.map((collection) => (
-                        <SidebarMenuItem key={collection.id}>
-                          <SidebarMenuButton>
-                            <Folder
-                              style={{ color: collection.primaryColor ?? undefined }}
-                            />
-                            <span>{collection.name}</span>
-                          </SidebarMenuButton>
-                          <SidebarMenuBadge>
-                            <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                          </SidebarMenuBadge>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                  </>
-                )}
-                {recents.length > 0 && (
-                  <>
-                    <div className="px-2 pt-3 pb-1 text-[0.7rem] font-medium tracking-wide text-sidebar-foreground/50">
-                      Recents
-                    </div>
-                    <SidebarMenu>
-                      {recents.map((collection) => (
-                        <SidebarMenuItem key={collection.id}>
-                          <SidebarMenuButton>
-                            <span
-                              aria-hidden
-                              className="inline-block size-2.5 shrink-0 rounded-full"
-                              style={{
-                                backgroundColor:
-                                  collection.primaryColor ?? "var(--muted-foreground)",
-                              }}
-                            />
-                            <span>{collection.name}</span>
-                          </SidebarMenuButton>
-                          <SidebarMenuBadge>{collection.itemCount}</SidebarMenuBadge>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                  </>
-                )}
+                <CollectionList
+                  label="Favorites"
+                  collections={favorites}
+                  renderIcon={(c) => (
+                    <Folder style={{ color: c.primaryColor ?? undefined }} />
+                  )}
+                  renderBadge={() => (
+                    <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                  )}
+                />
+                <CollectionList
+                  label="Recents"
+                  collections={recents}
+                  renderIcon={(c) => (
+                    <span
+                      aria-hidden
+                      className="inline-block size-2.5 shrink-0 rounded-full"
+                      style={{
+                        backgroundColor: c.primaryColor ?? "var(--muted-foreground)",
+                      }}
+                    />
+                  )}
+                  renderBadge={(c) => c.itemCount}
+                />
                 <SidebarMenu className="mt-2">
                   <SidebarMenuItem>
                     <SidebarMenuButton

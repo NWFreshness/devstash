@@ -10,8 +10,7 @@ import { ImageThumbnailCard } from "@/components/items/image-thumbnail-card";
 import { FileListRow } from "@/components/items/file-list-row";
 import { CreateItemDialog } from "@/components/items/create-item-dialog";
 import { iconByName } from "@/components/dashboard/type-icons";
-
-const FALLBACK_COLOR = "var(--muted-foreground)";
+import { FALLBACK_COLOR } from "@/lib/item-type-sets";
 
 export default async function ItemsByTypePage({
   params,

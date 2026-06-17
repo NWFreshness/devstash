@@ -10,8 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-const FALLBACK_COLOR = "var(--muted-foreground)";
+import { FALLBACK_COLOR } from "@/lib/item-type-sets";
 
 export function CollectionCard({ collection }: { collection: CollectionWithMeta }) {
   const accent = collection.primaryType?.color ?? FALLBACK_COLOR;

@@ -4,6 +4,8 @@ import { Download, File, FileText, FileCode, Archive, Pin, Star } from "lucide-r
 
 import type { ItemWithMeta } from "@/lib/db/items";
 import { useItemDrawer } from "@/components/items/item-drawer";
+import { formatBytes } from "@/lib/utils";
+
 function formatDate(date: Date) {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
@@ -14,13 +16,6 @@ function fileIcon(fileName: string | null) {
   if (["zip", "gz", "tar", "rar", "7z"].includes(ext)) return Archive;
   if (["js", "ts", "tsx", "jsx", "py", "rb", "go", "rs", "cs", "java", "php", "sh"].includes(ext)) return FileCode;
   return File;
-}
-
-function formatBytes(bytes: number | null): string {
-  if (!bytes) return "—";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export function FileListRow({ item }: { item: ItemWithMeta }) {

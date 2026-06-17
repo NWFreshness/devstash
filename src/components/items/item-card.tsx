@@ -6,8 +6,7 @@ import type { ItemWithMeta } from "@/lib/db/items";
 import { Badge } from "@/components/ui/badge";
 import { iconByName } from "@/components/dashboard/type-icons";
 import { useItemDrawer } from "@/components/items/item-drawer";
-
-const FALLBACK_COLOR = "var(--muted-foreground)";
+import { FALLBACK_COLOR } from "@/lib/item-type-sets";
 
 export function ItemCard({ item }: { item: ItemWithMeta }) {
   const Icon = iconByName[item.type.icon ?? ""] ?? Folder;

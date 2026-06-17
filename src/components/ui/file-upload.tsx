@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Upload, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { formatBytes } from "@/lib/utils";
 
 export interface UploadedFile {
   key: string;
@@ -18,12 +19,6 @@ interface FileUploadProps {
   onUpload: (result: UploadedFile) => void;
   onClear: () => void;
   uploaded: UploadedFile | null;
-}
-
-function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export function FileUpload({

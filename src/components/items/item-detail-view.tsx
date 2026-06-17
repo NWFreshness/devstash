@@ -1,26 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { Copy, Download, Folder, Pencil, Pin, Star, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Folder } from "lucide-react";
 
-import { deleteItem } from "@/actions/items";
 import type { ItemDetail } from "@/lib/db/items";
-import { LANGUAGE_TYPES, MARKDOWN_TYPES } from "@/lib/item-type-sets";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { FALLBACK_COLOR, LANGUAGE_TYPES, MARKDOWN_TYPES } from "@/lib/item-type-sets";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   SheetHeader,
@@ -29,9 +14,8 @@ import {
 import { CodeEditor } from "@/components/ui/code-editor";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { iconByName } from "@/components/dashboard/type-icons";
+import { ItemActionBar } from "@/components/items/item-action-bar";
 import { ItemEditForm } from "@/components/items/item-edit-form";
-
-const FALLBACK_COLOR = "var(--muted-foreground)";
 
 function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString("en-US", {
@@ -68,29 +52,9 @@ export function ItemDetailView({
   onUpdated: (detail: ItemDetail) => void;
   onDeleted: () => void;
 }) {
-  const router = useRouter();
   const [editing, setEditing] = useState(false);
-  const [deleting, startDelete] = useTransition();
   const Icon = iconByName[detail.type.icon ?? ""] ?? Folder;
   const color = detail.type.color ?? FALLBACK_COLOR;
-
-  function copyContent() {
-    const text = detail.content ?? detail.url ?? "";
-    if (text) navigator.clipboard.writeText(text);
-  }
-
-  function handleDelete() {
-    startDelete(async () => {
-      const result = await deleteItem(detail.id);
-      if (result.success) {
-        toast.success("Item deleted.");
-        onDeleted();
-        router.refresh();
-      } else {
-        toast.error(result.error);
-      }
-    });
-  }
 
   if (editing) {
     return (
@@ -130,80 +94,11 @@ export function ItemDetailView({
 
       <Separator />
 
-      <div className="flex items-center gap-1 px-4 py-2">
-        <Button variant="ghost" size="sm">
-          <Star
-            className={
-              detail.isFavorite ? "fill-amber-400 text-amber-400" : undefined
-            }
-          />
-          Favorite
-        </Button>
-        <Button variant="ghost" size="sm">
-          <Pin className={detail.isPinned ? "text-foreground" : undefined} />
-          Pin
-        </Button>
-        <Button variant="ghost" size="sm" onClick={copyContent}>
-          <Copy />
-          Copy
-        </Button>
-        {detail.fileUrl && (
-          <Button
-            variant="ghost"
-            size="sm"
-            render={
-              <a
-                href={`/api/download/${detail.fileUrl}`}
-                download={detail.fileName ?? undefined}
-              />
-            }
-          >
-            <Download />
-            Download
-          </Button>
-        )}
-        <div className="ml-auto flex items-center gap-1">
-          <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
-            <Pencil />
-            Edit
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  className="text-destructive"
-                />
-              }
-            >
-              <Trash2 />
-              <span className="sr-only">Delete</span>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete this item?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This permanently deletes &ldquo;{detail.title}&rdquo;. This
-                  action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel disabled={deleting}>
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  variant="destructive"
-                  onClick={handleDelete}
-                  disabled={deleting}
-                >
-                  {deleting ? "Deleting..." : "Delete"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </div>
+      <ItemActionBar
+        detail={detail}
+        onEdit={() => setEditing(true)}
+        onDeleted={onDeleted}
+      />
 
       <Separator />
 

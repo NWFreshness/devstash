@@ -1,5 +1,23 @@
 import { prisma } from "@/lib/prisma";
 
+/** Returns the item with the highest occurrence count, or null if empty. */
+function topByCount<T>(items: T[], key: (item: T) => string | null): T | null {
+  const counts = new Map<string, { item: T; count: number }>();
+  for (const item of items) {
+    const k = key(item);
+    if (!k) continue;
+    const entry = counts.get(k);
+    if (entry) entry.count += 1;
+    else counts.set(k, { item, count: 1 });
+  }
+  let top: T | null = null;
+  let topCount = 0;
+  for (const { item, count } of counts.values()) {
+    if (count > topCount) { topCount = count; top = item; }
+  }
+  return top;
+}
+
 export interface CollectionTypeMeta {
   slug: string;
   icon: string | null;
@@ -48,28 +66,13 @@ export async function getSidebarCollections(
     },
   });
 
-  const shaped: SidebarCollection[] = cols.map((col) => {
-    const colorCounts = new Map<string, number>();
-    for (const { type } of col.items) {
-      if (!type.color) continue;
-      colorCounts.set(type.color, (colorCounts.get(type.color) ?? 0) + 1);
-    }
-    let primaryColor: string | null = null;
-    let topCount = 0;
-    for (const [color, count] of colorCounts) {
-      if (count > topCount) {
-        topCount = count;
-        primaryColor = color;
-      }
-    }
-    return {
-      id: col.id,
-      name: col.name,
-      isFavorite: col.isFavorite,
-      itemCount: col.items.length,
-      primaryColor,
-    };
-  });
+  const shaped: SidebarCollection[] = cols.map((col) => ({
+    id: col.id,
+    name: col.name,
+    isFavorite: col.isFavorite,
+    itemCount: col.items.length,
+    primaryColor: topByCount(col.items, ({ type }) => type.color)?.type.color ?? null,
+  }));
 
   return {
     favorites: shaped.filter((c) => c.isFavorite),
@@ -97,23 +100,19 @@ export async function getRecentCollections(
   });
 
   return cols.map((col) => {
-    const counts = new Map<string, { meta: CollectionTypeMeta; count: number }>();
+    const primaryType = topByCount(col.items, ({ type }) => type.slug)?.type ?? null;
+    const seen = new Set<string>();
+    const types: CollectionTypeMeta[] = [];
     for (const { type } of col.items) {
-      const entry = counts.get(type.slug);
-      if (entry) entry.count += 1;
-      else counts.set(type.slug, { meta: type, count: 1 });
+      if (!seen.has(type.slug)) { seen.add(type.slug); types.push(type); }
     }
-    const types = Array.from(counts.values())
-      .sort((a, b) => b.count - a.count)
-      .map((t) => t.meta);
-
     return {
       id: col.id,
       name: col.name,
       description: col.description,
       isFavorite: col.isFavorite,
       itemCount: col.items.length,
-      primaryType: types[0] ?? null,
+      primaryType,
       types,
     };
   });
