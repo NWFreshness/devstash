@@ -21,6 +21,8 @@ model User {
   image String?
   emailVerified DateTime?
 
+  editorPreferences Json?
+
   // Billing
   isPro                Boolean   @default(false)
   stripeCustomerId     String?   @unique
