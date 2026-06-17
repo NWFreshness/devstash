@@ -1,23 +1,18 @@
-# Current Feature: Pagination
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
-
-- Add pagination to `/items/[type]` page
-- Add pagination to `/collections/[id]` page
-- Pagination controls at bottom: numbered page links, prev/next (greyed out when unavailable)
-- Constants: `ITEMS_PER_PAGE = 21`, `COLLECTIONS_PER_PAGE = 21`
-- Dashboard constants: `DASHBOARD_COLLECTIONS_LIMIT = 6`, `DASHBOARD_RECENT_ITEMS_LIMIT = 10`
-- Fetch only the current page's data (no loading all records)
 
 ## Notes
 
 ## History
 
 <!-- Keep this updated. Earliest to latest -->
+
+- Pagination: new `src/lib/pagination.ts` exports `ITEMS_PER_PAGE=21`, `COLLECTIONS_PER_PAGE=21`, `DASHBOARD_COLLECTIONS_LIMIT=6`, `DASHBOARD_RECENT_ITEMS_LIMIT=10`, and a `totalPages()` helper. `getItemsByType` and `getItemsByCollection` in `items.ts` now accept a `page` param and return `{ items, total }` via `Promise.all([findMany, count])` — fetching only one page at a time. New `src/components/ui/pagination.tsx`: `<Pagination>` renders numbered page links + prev/next as `<Link>` elements (disabled/greyed when unavailable), with ellipsis for large page counts. `/items/[type]` and `/collections/[id]` pages read `searchParams.page`, pass it to the DB helpers, and render `<Pagination>` at the bottom. Dashboard page now uses named constants instead of magic numbers. 36 tests still green; build passes.
 
 - Code Decomposition Refactor: `formatBytes` and `parseTags` extracted to `src/lib/utils.ts`; `FALLBACK_COLOR` moved to `src/lib/item-type-sets.ts` (removed from 5 files); `ItemActionBar` extracted to `src/components/items/item-action-bar.tsx`; shared `ItemFormFields` extracted to `src/components/items/item-fields.tsx` (used by both `CreateItemDialog` and `ItemEditForm`); local `CollectionList` function component extracted in `app-sidebar.tsx`; `topByCount<T>` private helper extracted in `collections.ts`. Pure refactor — no behavior changes. 34 tests green, build passes.
 
