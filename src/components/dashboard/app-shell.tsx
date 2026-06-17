@@ -2,8 +2,8 @@ import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { TopBar } from "@/components/dashboard/top-bar";
 import { ItemDrawerProvider } from "@/components/items/item-drawer";
 import { auth } from "@/auth";
-import { getCollectionsForSelect, getSidebarCollections } from "@/lib/db/collections";
-import { getItemTypeCounts } from "@/lib/db/items";
+import { getCollectionsForSelect, getSidebarCollections, getSearchCollections } from "@/lib/db/collections";
+import { getItemTypeCounts, getSearchItems } from "@/lib/db/items";
 import { getDemoUser } from "@/lib/db/user";
 import { prisma } from "@/lib/prisma";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -15,17 +15,20 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   const sessionUserId = session?.user?.id;
   const demoUserId = demoUser?.id ?? null;
 
-  const [authUser, itemTypes, collections, collectionsForSelect] = await Promise.all([
-    sessionUserId
-      ? prisma.user.findUnique({
-          where: { id: sessionUserId },
-          select: { name: true, email: true, image: true },
-        })
-      : null,
-    getItemTypeCounts(demoUserId),
-    getSidebarCollections(demoUserId),
-    getCollectionsForSelect(demoUserId),
-  ]);
+  const [authUser, itemTypes, collections, collectionsForSelect, searchItems, searchCollections] =
+    await Promise.all([
+      sessionUserId
+        ? prisma.user.findUnique({
+            where: { id: sessionUserId },
+            select: { name: true, email: true, image: true },
+          })
+        : null,
+      getItemTypeCounts(demoUserId),
+      getSidebarCollections(demoUserId),
+      getCollectionsForSelect(demoUserId),
+      getSearchItems(demoUserId),
+      getSearchCollections(demoUserId),
+    ]);
 
   return (
     <SidebarProvider>
@@ -35,8 +38,12 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         collections={collections}
       />
       <SidebarInset>
-        <TopBar collections={collectionsForSelect} />
         <ItemDrawerProvider collections={collectionsForSelect}>
+          <TopBar
+            collections={collectionsForSelect}
+            searchItems={searchItems}
+            searchCollections={searchCollections}
+          />
           <div className="flex-1 overflow-auto p-6">{children}</div>
         </ItemDrawerProvider>
       </SidebarInset>

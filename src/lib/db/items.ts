@@ -351,6 +351,27 @@ export async function getItemTypeCounts(
   }));
 }
 
+export interface SearchItem {
+  id: string;
+  title: string;
+  type: { slug: string; icon: string | null; color: string | null };
+}
+
+export async function getSearchItems(userId: string | null): Promise<SearchItem[]> {
+  if (!userId) return [];
+  const items = await prisma.item.findMany({
+    where: { userId },
+    select: {
+      id: true,
+      title: true,
+      type: { select: { slug: true, icon: true, color: true } },
+    },
+    orderBy: { updatedAt: "desc" },
+    take: 500,
+  });
+  return items;
+}
+
 export async function getPinnedItems(
   userId: string | null,
 ): Promise<ItemWithMeta[]> {
