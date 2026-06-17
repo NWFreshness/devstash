@@ -222,6 +222,10 @@ export function AppSidebar({ user, itemTypes, collections }: AppSidebarProps) {
                 <User />
                 Profile
               </DropdownMenuItem>
+              <DropdownMenuItem render={<Link href="/settings" />}>
+                <Settings />
+                Settings
+              </DropdownMenuItem>
               <DropdownMenuItem
                 variant="destructive"
                 onClick={() => signOut({ redirectTo: "/sign-in" })}

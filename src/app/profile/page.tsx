@@ -8,8 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getProfileUser, getProfileStats } from "@/lib/db/profile";
-import { ChangePasswordForm } from "@/components/profile/change-password-form";
-import { DeleteAccountSection } from "@/components/profile/delete-account-section";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +26,7 @@ export default async function ProfilePage() {
     month: "long",
     year: "numeric",
   });
+
 
   return (
     <div className="mx-auto max-w-2xl space-y-4 p-6">
@@ -89,30 +88,6 @@ export default async function ProfilePage() {
         </CardContent>
       </Card>
 
-      {/* Change password — email/password users only */}
-      {profileUser.hasPassword && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Change password</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ChangePasswordForm />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Danger zone */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-destructive">Danger zone</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">
-            Permanently delete your account and all associated data.
-          </p>
-          <DeleteAccountSection />
-        </CardContent>
-      </Card>
     </div>
   );
 }

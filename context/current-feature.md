@@ -1,12 +1,25 @@
-# Current Feature
+# Current Feature: Settings Page
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- New `/settings` page exists and is auth-protected via proxy
+- Settings link added to the user icon dropdown in the sidebar footer
+- Account section on the settings page contains: Change Password form and Delete Account action
+- Change Password and Delete Account are removed from the `/profile` page
+- `/profile` page retains user info card and usage stats card
+
 ## Notes
+
+- Settings page URL: `/settings`
+- Add "Settings" link to the DropdownMenu in `app-sidebar.tsx` (alongside the existing "Profile" link)
+- Move Change Password form (only shown when `user.password` is set) and Delete Account AlertDialog from `/profile` to `/settings`
+- Settings page is a server component fetching user from DB (same pattern as profile page)
+- Proxy matcher must include `/settings` so unauthenticated users are redirected
+- API routes (`POST /api/profile/change-password`, `DELETE /api/profile`) are unchanged — only the UI moves
 
 ## History
 
