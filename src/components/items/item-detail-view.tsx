@@ -47,10 +47,12 @@ export function ItemDetailView({
   detail,
   onUpdated,
   onDeleted,
+  collections,
 }: {
   detail: ItemDetail;
   onUpdated: (detail: ItemDetail) => void;
   onDeleted: () => void;
+  collections: { id: string; name: string }[];
 }) {
   const [editing, setEditing] = useState(false);
   const Icon = iconByName[detail.type.icon ?? ""] ?? Folder;
@@ -65,6 +67,7 @@ export function ItemDetailView({
           onUpdated(updated);
           setEditing(false);
         }}
+        collections={collections}
       />
     );
   }

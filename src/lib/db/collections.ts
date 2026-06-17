@@ -50,6 +50,17 @@ export interface SidebarCollections {
   recents: SidebarCollection[];
 }
 
+export async function getCollectionsForSelect(
+  userId: string | null,
+): Promise<{ id: string; name: string }[]> {
+  if (!userId) return [];
+  return prisma.collection.findMany({
+    where: { userId },
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+  });
+}
+
 export async function createCollection(
   userId: string | null,
   data: CreateCollectionInput,

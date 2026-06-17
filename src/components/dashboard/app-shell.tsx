@@ -2,7 +2,7 @@ import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { TopBar } from "@/components/dashboard/top-bar";
 import { ItemDrawerProvider } from "@/components/items/item-drawer";
 import { auth } from "@/auth";
-import { getSidebarCollections } from "@/lib/db/collections";
+import { getCollectionsForSelect, getSidebarCollections } from "@/lib/db/collections";
 import { getItemTypeCounts } from "@/lib/db/items";
 import { getDemoUser } from "@/lib/db/user";
 import { prisma } from "@/lib/prisma";
@@ -15,7 +15,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   const sessionUserId = session?.user?.id;
   const demoUserId = demoUser?.id ?? null;
 
-  const [authUser, itemTypes, collections] = await Promise.all([
+  const [authUser, itemTypes, collections, collectionsForSelect] = await Promise.all([
     sessionUserId
       ? prisma.user.findUnique({
           where: { id: sessionUserId },
@@ -24,6 +24,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       : null,
     getItemTypeCounts(demoUserId),
     getSidebarCollections(demoUserId),
+    getCollectionsForSelect(demoUserId),
   ]);
 
   return (
@@ -34,8 +35,8 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         collections={collections}
       />
       <SidebarInset>
-        <TopBar />
-        <ItemDrawerProvider>
+        <TopBar collections={collectionsForSelect} />
+        <ItemDrawerProvider collections={collectionsForSelect}>
           <div className="flex-1 overflow-auto p-6">{children}</div>
         </ItemDrawerProvider>
       </SidebarInset>

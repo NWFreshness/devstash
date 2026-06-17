@@ -6,7 +6,11 @@ import { CreateCollectionDialog } from "@/components/collections/create-collecti
 import { CreateItemDialog } from "@/components/items/create-item-dialog";
 
 /** Dashboard top bar. Search is display only; the trigger toggles the sidebar. */
-export function TopBar() {
+export function TopBar({
+  collections,
+}: {
+  collections: { id: string; name: string }[];
+}) {
   return (
     <header className="flex h-16 shrink-0 items-center gap-3 border-b px-4">
       <SidebarTrigger className="-ml-1" />
@@ -25,7 +29,7 @@ export function TopBar() {
 
       <div className="ml-auto flex items-center gap-2">
         <CreateCollectionDialog />
-        <CreateItemDialog />
+        <CreateItemDialog collections={collections} />
       </div>
     </header>
   );

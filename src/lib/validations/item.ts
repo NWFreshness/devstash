@@ -18,6 +18,9 @@ export const updateItemSchema = z.object({
     .preprocess(emptyToNull, z.string().trim().nullable())
     .default(null),
   tags: z.array(z.string().trim().min(1)).default([]),
+  collectionId: z
+    .preprocess(emptyToNull, z.string().nullable())
+    .default(null),
 });
 
 export type UpdateItemInput = z.infer<typeof updateItemSchema>;
@@ -49,6 +52,9 @@ export const createItemSchema = z
       .preprocess(emptyToNull, z.string().trim().nullable())
       .default(null),
     tags: z.array(z.string().trim().min(1)).default([]),
+    collectionId: z
+      .preprocess(emptyToNull, z.string().nullable())
+      .default(null),
     // File upload fields (file/image types only)
     fileUrl: z
       .preprocess(emptyToNull, z.string().nullable())

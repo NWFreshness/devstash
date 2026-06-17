@@ -41,11 +41,13 @@ const TYPE_LABELS: Record<(typeof CREATE_ITEM_TYPES)[number], string> = {
 interface CreateItemDialogProps {
   defaultType?: (typeof CREATE_ITEM_TYPES)[number];
   triggerElement?: React.ReactElement;
+  collections?: { id: string; name: string }[];
 }
 
 export function CreateItemDialog({
   defaultType = "snippet",
   triggerElement,
+  collections = [],
 }: CreateItemDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -59,6 +61,7 @@ export function CreateItemDialog({
   const [language, setLanguage] = useState("");
   const [url, setUrl] = useState("");
   const [tags, setTags] = useState("");
+  const [collectionId, setCollectionId] = useState("");
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
 
   const showUrl = typeSlug === "link";
@@ -72,6 +75,7 @@ export function CreateItemDialog({
     setLanguage("");
     setUrl("");
     setTags("");
+    setCollectionId("");
     setUploadedFile(null);
   }
 
@@ -95,6 +99,7 @@ export function CreateItemDialog({
         fileSize: uploadedFile?.fileSize ?? null,
         mimeType: uploadedFile?.mimeType ?? null,
         tags: parseTags(tags),
+        collectionId: collectionId || null,
       });
 
       if (result.success) {
@@ -168,6 +173,25 @@ export function CreateItemDialog({
               onClearUpload: () => setUploadedFile(null),
             }}
           />
+
+          {collections.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="create-collection">Collection</Label>
+              <Select value={collectionId} onValueChange={(v) => setCollectionId(v ?? "")}>
+                <SelectTrigger id="create-collection" className="w-full">
+                  <SelectValue placeholder="No collection" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No collection</SelectItem>
+                  {collections.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
         <DialogFooter>

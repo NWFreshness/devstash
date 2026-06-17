@@ -9,18 +9,28 @@ import type { ItemDetail } from "@/lib/db/items";
 import { CONTENT_TYPES, LANGUAGE_TYPES } from "@/lib/item-type-sets";
 import { parseTags } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ItemFormFields } from "@/components/items/item-fields";
 
 export function ItemEditForm({
   detail,
   onCancel,
   onSaved,
+  collections,
 }: {
   detail: ItemDetail;
   onCancel: () => void;
   onSaved: (detail: ItemDetail) => void;
+  collections: { id: string; name: string }[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -31,6 +41,7 @@ export function ItemEditForm({
   const [language, setLanguage] = useState(detail.language ?? "");
   const [url, setUrl] = useState(detail.url ?? "");
   const [tags, setTags] = useState(detail.tags.join(", "));
+  const [collectionId, setCollectionId] = useState(detail.collection?.id ?? "");
 
   const showContent = CONTENT_TYPES.has(detail.type.slug);
   const showLanguage = LANGUAGE_TYPES.has(detail.type.slug);
@@ -45,6 +56,7 @@ export function ItemEditForm({
         language: showLanguage ? language : null,
         url: showUrl ? url : null,
         tags: parseTags(tags),
+        collectionId: collectionId || null,
       });
 
       if (result.success) {
@@ -94,6 +106,25 @@ export function ItemEditForm({
             onTagsChange: setTags,
           }}
         />
+
+        {collections.length > 0 && (
+          <div className="space-y-2">
+            <Label htmlFor="edit-collection">Collection</Label>
+            <Select value={collectionId} onValueChange={(v) => setCollectionId(v ?? "")}>
+              <SelectTrigger id="edit-collection" className="w-full">
+                <SelectValue placeholder="No collection" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">No collection</SelectItem>
+                {collections.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
     </>
   );

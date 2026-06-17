@@ -114,7 +114,7 @@ export interface ItemDetail {
   isFavorite: boolean;
   isPinned: boolean;
   type: { name: string; slug: string; icon: string | null; color: string | null };
-  collection: { name: string } | null;
+  collection: { id: string; name: string } | null;
   tags: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -130,7 +130,7 @@ export async function getItemDetail(
     where: { id: itemId, userId },
     include: {
       type: { select: { name: true, slug: true, icon: true, color: true } },
-      collection: { select: { name: true } },
+      collection: { select: { id: true, name: true } },
       tags: { include: { tag: { select: { name: true } } } },
     },
   });
@@ -184,6 +184,7 @@ export async function createItem(
       mimeType: data.mimeType,
       userId,
       typeId: type.id,
+      collectionId: data.collectionId,
       tags: {
         create: data.tags.map((name) => ({
           tag: {
@@ -223,6 +224,7 @@ export async function updateItem(
       content: data.content,
       url: data.url,
       language: data.language,
+      collectionId: data.collectionId,
       tags: {
         deleteMany: {},
         create: data.tags.map((name) => ({

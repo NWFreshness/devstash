@@ -11,6 +11,7 @@ describe("updateItemSchema", () => {
       url: null,
       language: null,
       tags: [],
+      collectionId: null,
     });
   });
 
@@ -59,6 +60,15 @@ describe("updateItemSchema", () => {
       updateItemSchema.safeParse({ title: "x", tags: ["ok", ""] }).success,
     ).toBe(false);
   });
+
+  it("accepts a collectionId string and coerces blank to null", () => {
+    expect(
+      updateItemSchema.parse({ title: "x", collectionId: "coll_123" }).collectionId,
+    ).toBe("coll_123");
+    expect(
+      updateItemSchema.parse({ title: "x", collectionId: "" }).collectionId,
+    ).toBeNull();
+  });
 });
 
 describe("createItemSchema", () => {
@@ -75,6 +85,7 @@ describe("createItemSchema", () => {
       url: null,
       language: null,
       tags: [],
+      collectionId: null,
       fileUrl: null,
       fileName: null,
       fileSize: null,
@@ -120,5 +131,14 @@ describe("createItemSchema", () => {
       content: "  code  ",
     });
     expect(result.content).toBe("  code  ");
+  });
+
+  it("accepts a collectionId string and coerces blank to null", () => {
+    expect(
+      createItemSchema.parse({ typeSlug: "note", title: "x", collectionId: "coll_abc" }).collectionId,
+    ).toBe("coll_abc");
+    expect(
+      createItemSchema.parse({ typeSlug: "note", title: "x", collectionId: "" }).collectionId,
+    ).toBeNull();
   });
 });
