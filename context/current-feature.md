@@ -1,26 +1,12 @@
-# Current Feature: Collection Create
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add a "New Collection" button to the top bar (alongside the existing "New Item" button)
-- Clicking the button opens a modal dialog with Name (required) and Description (optional) fields
-- On save, call a server action / API route that creates the collection scoped to the current user
-- Show a success toast and close the modal on success; show an error toast on failure
-- Refresh the page/list after creation so the new collection appears in the sidebar and any collections view without a full page reload
-
 ## Notes
-
-- Follow the same patterns as Item Create: modal dialog, controlled inputs, `useTransition` for pending state, `router.refresh()` after success
-- Collections are user-scoped — all DB queries must scope by `userId` (use `getDemoUser()` consistent with the rest of the app)
-- Server-side: new `createCollection` query in `src/lib/db/collections.ts` and a `createCollection` server action in `src/actions/collections.ts`
-- Validation: Zod schema in `src/lib/validations/collection.ts` (name trimmed/non-empty, description optional blank→null)
-- Dialog component: reuse the existing `src/components/ui/dialog.tsx` pattern; new client component `src/components/collections/create-collection-dialog.tsx`
-- Top bar is a server component (`top-bar.tsx`) — inject the new dialog as a client island, same as `CreateItemDialog`
-- No new shadcn components should be needed (dialog, input, textarea, button already exist)
 
 ## History
 
@@ -64,3 +50,4 @@ In Progress
 - File List View: new `src/components/items/file-list-row.tsx` — single-column list row with file type icon (pdf→FileText, archives→Archive, code files→FileCode, default→File), file name, size (`formatBytes`), upload date, and a Download button that appears on row hover and calls `e.stopPropagation()` so it doesn't open the drawer. Pin/star indicators included. `ItemWithMeta` and `shape()` in `src/lib/db/items.ts` gained `fileName` and `fileSize` (scalars were already fetched by Prisma but not surfaced). `/items/[type]/page.tsx` branches on `typeSlug === "file"` to render `FileListRow` items in a `<div className="flex flex-col">`, sitting between the image gallery branch and the default card grid. No new unit tests (React component only). Build passes; 34 tests still green.
 - Copy Icon on Cards: `content` and `url` added to `ItemWithMeta` and `shape()` in `src/lib/db/items.ts` (scalars already fetched by Prisma list queries; now surfaced). `ItemCard` and `ItemRow` each gained a `Copy` icon button (lucide-react) that appears on hover via `group`/`group-hover:opacity-100`; clicking calls `navigator.clipboard.writeText(content ?? url ?? title)` and stops propagation so the drawer doesn't open. Build passes; 34 tests still green.
 - Codebase Audit Fixes: addressed 10 findings from security/performance/quality audit. Security: path traversal guard on download route (prefix check); TOCTOU fix on password reset token (wrapped in $transaction); verify-email expiry checked before token consumption; change-password 500→400 on malformed JSON; file-upload XHR onload wrapped in try/catch. Performance: getSidebarCollections capped at take:50; getItemsByType capped at take:200. Code quality: CONTENT_TYPES/LANGUAGE_TYPES/MARKDOWN_TYPES extracted to src/lib/item-type-sets.ts; item-drawer.tsx split into item-drawer.tsx + item-detail-view.tsx + item-edit-form.tsx; dead typeIcon/typeColor exports removed from type-icons.ts; unused mock-data.ts deleted. Build passes; 34 tests still green.
+- Collection Create: "New Collection" button in the top bar now opens a centered dialog with Name (required) and Description (optional) fields. New `src/lib/validations/collection.ts` (`createCollectionSchema` with `emptyToNull` on description); new `createCollection(userId, data)` query in `src/lib/db/collections.ts` (user-scoped `prisma.collection.create`); new `src/actions/collections.ts` (`"use server"`, `auth()` gate, demo-user scope, `{ success, data/error }` pattern). New client component `src/components/collections/create-collection-dialog.tsx` — controlled Name input (Enter key submits), Description textarea, `useTransition` for pending state, success/error toasts via Sonner, `router.refresh()` to update sidebar and dashboard collections grid. `top-bar.tsx` replaced the inert static button with `<CreateCollectionDialog />`. 34 tests still green; build passes.
