@@ -1,26 +1,12 @@
-# Current Feature: Favorites Page
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add star icon button to TopBar linking to /favorites
-- Create /favorites route (auth-protected via proxy)
-- Fetch all favorited items and collections for the current user
-- Compact, high-density list view (VS Code/terminal style — no cards or heavy borders)
-- Each row: type icon, title, type badge, date (updatedAt)
-- Separate sections for Items and Collections with item counts
-- Clicking an item opens the ItemDrawer; clicking a collection navigates to /collections/[id]
-- Empty state when no favorites exist
-- Sort by most recently favorited (updatedAt desc)
-
 ## Notes
-
-- UI style: monospace/semi-monospace font, minimal padding, subtle hover states, clean lines only
-- Follow existing AppShell + force-dynamic pattern used by /collections and /items/[type]
-- Proxy matcher needs /favorites added alongside /dashboard, /items, /collections, /settings
 
 ## History
 
@@ -79,3 +65,5 @@ In Progress
 - Settings Page: new `/settings` page (auth-protected via proxy matcher) with Change Password form (visible only for email/password users) and Delete Account AlertDialog. "Settings" link added to the user icon `DropdownMenu` in `app-sidebar.tsx` (between Profile and Sign out). Both account actions moved from `/profile` to `/settings`; `/profile` now shows only the user info card and usage stats card. Settings page is a server component using the existing `getProfileUser` helper — no new DB queries. API routes (`POST /api/profile/change-password`, `DELETE /api/profile`) unchanged. 36 tests still green; build passes.
 
 - Editor Preferences Settings: new `editorPreferences Json?` column on `User` (migration `20260617223954_add_editor_preferences`). Settings page gains an "Editor preferences" card with font size (12–20px), tab size (2/4 spaces), theme (vs-dark/monokai/github-dark), word wrap toggle (default on), and minimap toggle (default off). Each control auto-saves immediately via `updateEditorPreferences` server action (`src/actions/editor-preferences.ts`) with a Sonner success toast — no save button. New `EditorPreferencesProvider` (`src/contexts/editor-preferences-context.tsx`) wraps the `AppShell` content area so client components can read prefs via `useEditorPreferences`. `CodeEditor` reads from context and passes `fontSize`, `tabSize`, `wordWrap`, `minimap`, and `theme` to Monaco. Monokai and GitHub Dark theme JSONs bundled locally at `src/lib/monaco-themes/` (Turbopack workaround for filenames with spaces); registered via Monaco's `beforeMount`. `parseEditorPreferences` helper in `src/types/editor-preferences.ts` safely coerces the DB JSON to a typed struct with defaults. Dependency added: `monaco-themes`. 36 tests still green; build passes. NOTE: shipped without in-browser verification — Turbopack dev server required a cache clear after `prisma generate`; verify on next fresh `npm run dev`.
+
+- Favorites Page: new `/favorites` route (auth-protected via proxy matcher) with a compact, monospace list view. Star icon button added to `TopBar` linking to `/favorites`. Two new DB helpers: `getFavoriteItems` in `items.ts` (items where `isFavorite: true`, ordered by `updatedAt` desc) and `getFavoriteCollections` in `collections.ts` (same pattern). Page has two sections — "items N" and "collections N" — each rendered as a divide-separated list; items show type icon (colored by type), title, type badge, and date; collections show folder icon, name, item count, and date. New client component `src/components/favorites/favorite-item-row.tsx` calls `useItemDrawer()` so clicking an item opens the drawer; collection rows are `<Link>` elements navigating to `/collections/[id]`. Empty state (star icon + message) shown when both lists are empty. No migration, no new Zod schemas, no new unit tests (Prisma helpers + React components only). 36 tests still green; build passes; verified in-browser via Playwright (page renders, item opens drawer, collection navigates correctly).
