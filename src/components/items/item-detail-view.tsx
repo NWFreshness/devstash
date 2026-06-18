@@ -102,6 +102,7 @@ export function ItemDetailView({
         onEdit={() => setEditing(true)}
         onDeleted={onDeleted}
         onFavoriteToggled={(isFavorite) => onUpdated({ ...detail, isFavorite })}
+        onPinToggled={(isPinned) => onUpdated({ ...detail, isPinned })}
       />
 
       <Separator />
