@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Copy, Download, Pencil, Pin, Star, Trash2 } from "lucide-react";
 
-import { deleteItem, toggleItemFavorite } from "@/actions/items";
+import { deleteItem, toggleItemFavorite, toggleItemPin } from "@/actions/items";
 import type { ItemDetail } from "@/lib/db/items";
 import {
   AlertDialog,
@@ -25,18 +25,32 @@ interface ItemActionBarProps {
   onEdit: () => void;
   onDeleted: () => void;
   onFavoriteToggled: (isFavorite: boolean) => void;
+  onPinToggled: (isPinned: boolean) => void;
 }
 
-export function ItemActionBar({ detail, onEdit, onDeleted, onFavoriteToggled }: ItemActionBarProps) {
+export function ItemActionBar({ detail, onEdit, onDeleted, onFavoriteToggled, onPinToggled }: ItemActionBarProps) {
   const router = useRouter();
   const [deleting, startDelete] = useTransition();
   const [togglingFavorite, startToggleFavorite] = useTransition();
+  const [togglingPin, startTogglePin] = useTransition();
 
   function handleToggleFavorite() {
     startToggleFavorite(async () => {
       const result = await toggleItemFavorite(detail.id);
       if (result.success) {
         onFavoriteToggled(result.data.isFavorite);
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    });
+  }
+
+  function handleTogglePin() {
+    startTogglePin(async () => {
+      const result = await toggleItemPin(detail.id);
+      if (result.success) {
+        onPinToggled(result.data.isPinned);
         router.refresh();
       } else {
         toast.error(result.error);
@@ -77,8 +91,13 @@ export function ItemActionBar({ detail, onEdit, onDeleted, onFavoriteToggled }: 
         />
         Favorite
       </Button>
-      <Button variant="ghost" size="sm">
-        <Pin className={detail.isPinned ? "text-foreground" : undefined} />
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleTogglePin}
+        disabled={togglingPin}
+      >
+        <Pin className={detail.isPinned ? "fill-foreground text-foreground" : undefined} />
         Pin
       </Button>
       <Button variant="ghost" size="sm" onClick={copyContent}>

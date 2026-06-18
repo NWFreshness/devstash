@@ -1,12 +1,23 @@
-# Current Feature
+# Current Feature: Pinned Items
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Create `toggleItemPin` server action (follow the `toggleItemFavorite` pattern)
+- Wire up the Pin button in `ItemDrawer` (currently has no `onClick`)
+- Optimistic UI update for instant feedback + toast on success/error
+- Pinned items sort to the top of item listings (`/items/[type]`)
+- Pinned items appear in the dashboard "pinned items" section
+- Items only — no pin feature for collections
+
 ## Notes
+
+- Follow the Favorite Button pattern exactly: DB query → server action → `ItemActionBar` prop → `ItemDetailView` wiring
+- Pin icon on `ItemCard` is already a static indicator — it stays static (no click handler needed on cards)
+- Spec file: `context/features/pinned-spec.md`
 
 ## History
 
