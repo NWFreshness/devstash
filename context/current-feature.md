@@ -1,32 +1,20 @@
-# Current Feature: Homepage Mockup
+# Current Feature
 
 ## Status
 
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
 
-- Create `prototypes/homepage/` with `index.html`, `styles.css`, `script.js`
-- Hero section: "chaos to order" visual with floating chaos icons (bouncing off walls, repelling from mouse) on left, pulsing arrow center, dashboard preview on right
-- Fixed top navigation with logo, Features/Pricing links, Sign In/Get Started buttons
-- Hero text: gradient headline, subheadline, CTA buttons
-- Features section: 6 cards with item type accent colors
-- AI section: Pro badge + checklist left, code editor mockup with AI tags right
-- Pricing section: Free vs Pro with monthly/yearly toggle
-- CTA section and footer
-- Scroll fade-in animations, navbar opacity on scroll
-- Fully responsive: mobile stack, arrow rotates 90deg
+<!-- Add goals here -->
 
 ## Notes
 
-- Output location: `prototypes/homepage/` (standalone HTML/CSS/JS, not part of Next.js)
-- Color palette per item type: Snippet #3b82f6, Prompt #f59e0b, Command #06b6d4, Note #22c55e, File #64748b, Image #ec4899, URL #6366f1
-- Chaos icons: Notion, GitHub, Slack, VS Code logos + Browser tabs, Terminal, Text file, Bookmark icons using requestAnimationFrame
-- Dashboard preview shows simplified sidebar + card grid with colored top borders
-- Pricing: Free ($0, 50 items, 3 collections) vs Pro ($8/mo or $72/yr)
-- No Next.js or Tailwind — pure HTML/CSS/JS prototype
+<!-- Add notes here -->
 
 ## History
+
+<!-- Keep this updated. Earliest to latest -->
 
 - Pagination: new `src/lib/pagination.ts` exports `ITEMS_PER_PAGE=21`, `COLLECTIONS_PER_PAGE=21`, `DASHBOARD_COLLECTIONS_LIMIT=6`, `DASHBOARD_RECENT_ITEMS_LIMIT=10`, and a `totalPages()` helper. `getItemsByType` and `getItemsByCollection` in `items.ts` now accept a `page` param and return `{ items, total }` via `Promise.all([findMany, count])` — fetching only one page at a time. New `src/components/ui/pagination.tsx`: `<Pagination>` renders numbered page links + prev/next as `<Link>` elements (disabled/greyed when unavailable), with ellipsis for large page counts. `/items/[type]` and `/collections/[id]` pages read `searchParams.page`, pass it to the DB helpers, and render `<Pagination>` at the bottom. Dashboard page now uses named constants instead of magic numbers. 36 tests still green; build passes.
 
@@ -87,3 +75,5 @@ In Progress
 - Favorites Page: new `/favorites` route (auth-protected via proxy matcher) with a compact, monospace list view. Star icon button added to `TopBar` linking to `/favorites`. Two new DB helpers: `getFavoriteItems` in `items.ts` (items where `isFavorite: true`, ordered by `updatedAt` desc) and `getFavoriteCollections` in `collections.ts` (same pattern). Page has two sections — "items N" and "collections N" — each rendered as a divide-separated list; items show type icon (colored by type), title, type badge, and date; collections show folder icon, name, item count, and date. New client component `src/components/favorites/favorite-item-row.tsx` calls `useItemDrawer()` so clicking an item opens the drawer; collection rows are `<Link>` elements navigating to `/collections/[id]`. Empty state (star icon + message) shown when both lists are empty. No migration, no new Zod schemas, no new unit tests (Prisma helpers + React components only). 36 tests still green; build passes; verified in-browser via Playwright (page renders, item opens drawer, collection navigates correctly).
 
 - Pinned Items: new `toggleItemPin(userId, itemId)` DB query and `toggleItemPin(itemId)` server action (mirrors `toggleItemFavorite` pattern exactly). `ItemActionBar` gained `onPinToggled` prop and a wired Pin button with `useTransition` for pending state + toast feedback; pin icon fills when active. `ItemDetailView` passes `onPinToggled={(isPinned) => onUpdated({ ...detail, isPinned })}` for optimistic in-place update. `getItemsByType` orderBy updated to `[{ isPinned: "desc" }, { createdAt: "desc" }]` so pinned items sort to the top of `/items/[type]` listings; dashboard pinned section updates automatically via `router.refresh()`. Items only — no collection pinning. No migration (column already existed). 36 tests still green; build passes.
+
+- Homepage Mockup: standalone prototype at `prototypes/homepage/` (pure HTML/CSS/JS). Hero: animated chaos icons (bounce off walls, collide with each other, repel from mouse cursor) on left, pulsing arrow center, dashboard mockup with colored card borders on right. Features section with 6 cards using item type accent colors. AI section with code editor mockup and AI-generated tags demo. Pricing section with Free/Pro cards and monthly/yearly billing toggle ($8/mo or $6/mo billed $72/yr). CTA section, footer, scroll fade-in animations, navbar opacity on scroll. Fully responsive — mobile stacks vertically with arrow rotating 90deg.
