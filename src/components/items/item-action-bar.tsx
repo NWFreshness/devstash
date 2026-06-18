@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Copy, Download, Pencil, Pin, Star, Trash2 } from "lucide-react";
 
-import { deleteItem } from "@/actions/items";
+import { deleteItem, toggleItemFavorite } from "@/actions/items";
 import type { ItemDetail } from "@/lib/db/items";
 import {
   AlertDialog,
@@ -24,11 +24,25 @@ interface ItemActionBarProps {
   detail: ItemDetail;
   onEdit: () => void;
   onDeleted: () => void;
+  onFavoriteToggled: (isFavorite: boolean) => void;
 }
 
-export function ItemActionBar({ detail, onEdit, onDeleted }: ItemActionBarProps) {
+export function ItemActionBar({ detail, onEdit, onDeleted, onFavoriteToggled }: ItemActionBarProps) {
   const router = useRouter();
   const [deleting, startDelete] = useTransition();
+  const [togglingFavorite, startToggleFavorite] = useTransition();
+
+  function handleToggleFavorite() {
+    startToggleFavorite(async () => {
+      const result = await toggleItemFavorite(detail.id);
+      if (result.success) {
+        onFavoriteToggled(result.data.isFavorite);
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    });
+  }
 
   function copyContent() {
     const text = detail.content ?? detail.url ?? "";
@@ -50,7 +64,12 @@ export function ItemActionBar({ detail, onEdit, onDeleted }: ItemActionBarProps)
 
   return (
     <div className="flex items-center gap-1 px-4 py-2">
-      <Button variant="ghost" size="sm">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleToggleFavorite}
+        disabled={togglingFavorite}
+      >
         <Star
           className={
             detail.isFavorite ? "fill-amber-400 text-amber-400" : undefined

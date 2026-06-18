@@ -406,6 +406,24 @@ export async function getFavoriteItems(userId: string | null): Promise<FavoriteI
   });
 }
 
+export async function toggleItemFavorite(
+  userId: string | null,
+  itemId: string,
+): Promise<{ isFavorite: boolean } | null> {
+  if (!userId) return null;
+  const existing = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    select: { isFavorite: true },
+  });
+  if (!existing) return null;
+  const updated = await prisma.item.update({
+    where: { id: itemId },
+    data: { isFavorite: !existing.isFavorite },
+    select: { isFavorite: true },
+  });
+  return { isFavorite: updated.isFavorite };
+}
+
 export async function getPinnedItems(
   userId: string | null,
 ): Promise<ItemWithMeta[]> {

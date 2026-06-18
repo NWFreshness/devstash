@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Folder, MoreHorizontal, Pencil, Star, Trash2 } from "lucide-react";
 
-import { deleteCollection } from "@/actions/collections";
+import { deleteCollection, toggleCollectionFavorite } from "@/actions/collections";
 import type { CollectionWithMeta } from "@/lib/db/collections";
 import { iconByName } from "@/components/dashboard/type-icons";
 import { EditCollectionDialog } from "@/components/collections/edit-collection-dialog";
@@ -47,9 +47,21 @@ export function CollectionCard({
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, startDelete] = useTransition();
+  const [togglingFavorite, startToggleFavorite] = useTransition();
 
   const accent = collection.primaryType?.color ?? FALLBACK_COLOR;
   const cardHref = href ?? `/collections/${collection.id}`;
+
+  function handleToggleFavorite() {
+    startToggleFavorite(async () => {
+      const result = await toggleCollectionFavorite(collection.id);
+      if (result.success) {
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    });
+  }
 
   function handleDelete() {
     startDelete(async () => {
@@ -102,9 +114,18 @@ export function CollectionCard({
                       <Pencil />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Star />
-                      Favorite
+                    <DropdownMenuItem
+                      onClick={handleToggleFavorite}
+                      disabled={togglingFavorite}
+                    >
+                      <Star
+                        className={
+                          collection.isFavorite
+                            ? "fill-amber-400 text-amber-400"
+                            : undefined
+                        }
+                      />
+                      {collection.isFavorite ? "Unfavorite" : "Favorite"}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem

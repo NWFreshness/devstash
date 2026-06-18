@@ -3,8 +3,9 @@
 import { auth } from "@/auth";
 import {
   createCollection as createCollectionQuery,
-  updateCollection as updateCollectionQuery,
   deleteCollection as deleteCollectionQuery,
+  toggleCollectionFavorite as toggleCollectionFavoriteQuery,
+  updateCollection as updateCollectionQuery,
 } from "@/lib/db/collections";
 import { getDemoUser } from "@/lib/db/user";
 import { createCollectionSchema, updateCollectionSchema } from "@/lib/validations/collection";
@@ -60,6 +61,20 @@ export async function updateCollection(
   }
 
   return { success: true, data: updated };
+}
+
+export async function toggleCollectionFavorite(
+  collectionId: string,
+): Promise<ActionResult<{ isFavorite: boolean }>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const demoUser = await getDemoUser();
+  const result = await toggleCollectionFavoriteQuery(demoUser?.id ?? null, collectionId);
+  if (!result) return { success: false, error: "Collection not found." };
+  return { success: true, data: result };
 }
 
 export async function deleteCollection(

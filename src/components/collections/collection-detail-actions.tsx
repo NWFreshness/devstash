@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Pencil, Star, Trash2 } from "lucide-react";
 
-import { deleteCollection } from "@/actions/collections";
+import { deleteCollection, toggleCollectionFavorite } from "@/actions/collections";
 import { EditCollectionDialog } from "@/components/collections/edit-collection-dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +33,18 @@ export function CollectionDetailActions({ collection }: Props) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [deleting, startDelete] = useTransition();
+  const [togglingFavorite, startToggleFavorite] = useTransition();
+
+  function handleToggleFavorite() {
+    startToggleFavorite(async () => {
+      const result = await toggleCollectionFavorite(collection.id);
+      if (result.success) {
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    });
+  }
 
   function handleDelete() {
     startDelete(async () => {
@@ -58,8 +70,12 @@ export function CollectionDetailActions({ collection }: Props) {
           Edit
         </Button>
 
-        {/* Favorite — UI only, mutation not yet implemented */}
-        <Button variant="ghost" size="sm">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleToggleFavorite}
+          disabled={togglingFavorite}
+        >
           <Star
             className={
               collection.isFavorite

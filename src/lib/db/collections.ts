@@ -133,6 +133,24 @@ export async function updateCollection(
   });
 }
 
+export async function toggleCollectionFavorite(
+  userId: string | null,
+  collectionId: string,
+): Promise<{ isFavorite: boolean } | null> {
+  if (!userId) return null;
+  const existing = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    select: { isFavorite: true },
+  });
+  if (!existing) return null;
+  const updated = await prisma.collection.update({
+    where: { id: collectionId },
+    data: { isFavorite: !existing.isFavorite },
+    select: { isFavorite: true },
+  });
+  return { isFavorite: updated.isFavorite };
+}
+
 export async function deleteCollection(
   userId: string | null,
   collectionId: string,
