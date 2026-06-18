@@ -1,23 +1,16 @@
-# Current Feature: Pinned Items
+# Current Feature
 
 ## Status
 
-In Progress
+<!-- Not Started | In Progress | Complete -->
 
 ## Goals
 
-- Create `toggleItemPin` server action (follow the `toggleItemFavorite` pattern)
-- Wire up the Pin button in `ItemDrawer` (currently has no `onClick`)
-- Optimistic UI update for instant feedback + toast on success/error
-- Pinned items sort to the top of item listings (`/items/[type]`)
-- Pinned items appear in the dashboard "pinned items" section
-- Items only — no pin feature for collections
+<!-- Add goals here -->
 
 ## Notes
 
-- Follow the Favorite Button pattern exactly: DB query → server action → `ItemActionBar` prop → `ItemDetailView` wiring
-- Pin icon on `ItemCard` is already a static indicator — it stays static (no click handler needed on cards)
-- Spec file: `context/features/pinned-spec.md`
+<!-- Add notes here -->
 
 ## History
 
@@ -80,3 +73,5 @@ In Progress
 - Favorite Toggle: wired up all previously visual-only favorite buttons. New `toggleItemFavorite(userId, itemId)` DB query and `toggleItemFavorite(itemId)` server action in `items.ts`; new `toggleCollectionFavorite(userId, collectionId)` DB query and `toggleCollectionFavorite(collectionId)` server action in `collections.ts` — each reads the current flag, flips it, and returns `{ isFavorite: boolean }`. Item drawer: `ItemActionBar` gained `onFavoriteToggled` prop wired via `ItemDetailView` — clicking the star calls the action, updates the drawer detail in-place (`{ ...detail, isFavorite }`), and calls `router.refresh()`. Collection detail page (`CollectionDetailActions`): Favorite button calls `toggleCollectionFavorite` + `router.refresh()`, "UI only" comment removed. Collection cards (`CollectionCard`): Favorite dropdown item now wired, shows "Unfavorite" when already favorited, star renders amber when active. No migration, no new Zod schemas, no new unit tests (Prisma helpers + React components only). 36 tests still green; build passes.
 
 - Favorites Page: new `/favorites` route (auth-protected via proxy matcher) with a compact, monospace list view. Star icon button added to `TopBar` linking to `/favorites`. Two new DB helpers: `getFavoriteItems` in `items.ts` (items where `isFavorite: true`, ordered by `updatedAt` desc) and `getFavoriteCollections` in `collections.ts` (same pattern). Page has two sections — "items N" and "collections N" — each rendered as a divide-separated list; items show type icon (colored by type), title, type badge, and date; collections show folder icon, name, item count, and date. New client component `src/components/favorites/favorite-item-row.tsx` calls `useItemDrawer()` so clicking an item opens the drawer; collection rows are `<Link>` elements navigating to `/collections/[id]`. Empty state (star icon + message) shown when both lists are empty. No migration, no new Zod schemas, no new unit tests (Prisma helpers + React components only). 36 tests still green; build passes; verified in-browser via Playwright (page renders, item opens drawer, collection navigates correctly).
+
+- Pinned Items: new `toggleItemPin(userId, itemId)` DB query and `toggleItemPin(itemId)` server action (mirrors `toggleItemFavorite` pattern exactly). `ItemActionBar` gained `onPinToggled` prop and a wired Pin button with `useTransition` for pending state + toast feedback; pin icon fills when active. `ItemDetailView` passes `onPinToggled={(isPinned) => onUpdated({ ...detail, isPinned })}` for optimistic in-place update. `getItemsByType` orderBy updated to `[{ isPinned: "desc" }, { createdAt: "desc" }]` so pinned items sort to the top of `/items/[type]` listings; dashboard pinned section updates automatically via `router.refresh()`. Items only — no collection pinning. No migration (column already existed). 36 tests still green; build passes.
