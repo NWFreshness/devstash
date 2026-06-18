@@ -1,20 +1,32 @@
-# Current Feature
+# Current Feature: Homepage Mockup
 
 ## Status
 
-<!-- Not Started | In Progress | Complete -->
+In Progress
 
 ## Goals
 
-<!-- Add goals here -->
+- Create `prototypes/homepage/` with `index.html`, `styles.css`, `script.js`
+- Hero section: "chaos to order" visual with floating chaos icons (bouncing off walls, repelling from mouse) on left, pulsing arrow center, dashboard preview on right
+- Fixed top navigation with logo, Features/Pricing links, Sign In/Get Started buttons
+- Hero text: gradient headline, subheadline, CTA buttons
+- Features section: 6 cards with item type accent colors
+- AI section: Pro badge + checklist left, code editor mockup with AI tags right
+- Pricing section: Free vs Pro with monthly/yearly toggle
+- CTA section and footer
+- Scroll fade-in animations, navbar opacity on scroll
+- Fully responsive: mobile stack, arrow rotates 90deg
 
 ## Notes
 
-<!-- Add notes here -->
+- Output location: `prototypes/homepage/` (standalone HTML/CSS/JS, not part of Next.js)
+- Color palette per item type: Snippet #3b82f6, Prompt #f59e0b, Command #06b6d4, Note #22c55e, File #64748b, Image #ec4899, URL #6366f1
+- Chaos icons: Notion, GitHub, Slack, VS Code logos + Browser tabs, Terminal, Text file, Bookmark icons using requestAnimationFrame
+- Dashboard preview shows simplified sidebar + card grid with colored top borders
+- Pricing: Free ($0, 50 items, 3 collections) vs Pro ($8/mo or $72/yr)
+- No Next.js or Tailwind — pure HTML/CSS/JS prototype
 
 ## History
-
-<!-- Keep this updated. Earliest to latest -->
 
 - Pagination: new `src/lib/pagination.ts` exports `ITEMS_PER_PAGE=21`, `COLLECTIONS_PER_PAGE=21`, `DASHBOARD_COLLECTIONS_LIMIT=6`, `DASHBOARD_RECENT_ITEMS_LIMIT=10`, and a `totalPages()` helper. `getItemsByType` and `getItemsByCollection` in `items.ts` now accept a `page` param and return `{ items, total }` via `Promise.all([findMany, count])` — fetching only one page at a time. New `src/components/ui/pagination.tsx`: `<Pagination>` renders numbered page links + prev/next as `<Link>` elements (disabled/greyed when unavailable), with ellipsis for large page counts. `/items/[type]` and `/collections/[id]` pages read `searchParams.page`, pass it to the DB helpers, and render `<Pagination>` at the bottom. Dashboard page now uses named constants instead of magic numbers. 36 tests still green; build passes.
 
