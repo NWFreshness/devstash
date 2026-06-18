@@ -385,6 +385,27 @@ export async function getSearchItems(userId: string | null): Promise<SearchItem[
   return items;
 }
 
+export interface FavoriteItem {
+  id: string;
+  title: string;
+  updatedAt: Date;
+  type: { slug: string; icon: string | null; color: string | null };
+}
+
+export async function getFavoriteItems(userId: string | null): Promise<FavoriteItem[]> {
+  if (!userId) return [];
+  return prisma.item.findMany({
+    where: { userId, isFavorite: true },
+    select: {
+      id: true,
+      title: true,
+      updatedAt: true,
+      type: { select: { slug: true, icon: true, color: true } },
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+}
+
 export async function getPinnedItems(
   userId: string | null,
 ): Promise<ItemWithMeta[]> {

@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { Star } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
 import { CreateItemDialog } from "@/components/items/create-item-dialog";
@@ -19,6 +21,13 @@ export function TopBar({
       <SidebarTrigger className="-ml-1" />
       <SearchTrigger items={searchItems} collections={searchCollections} />
       <div className="ml-auto flex items-center gap-2">
+        <Link
+          href="/favorites"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          title="Favorites"
+        >
+          <Star size={16} />
+        </Link>
         <CreateCollectionDialog />
         <CreateItemDialog collections={collections} />
       </div>

@@ -1,12 +1,26 @@
-# Current Feature
+# Current Feature: Favorites Page
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Add star icon button to TopBar linking to /favorites
+- Create /favorites route (auth-protected via proxy)
+- Fetch all favorited items and collections for the current user
+- Compact, high-density list view (VS Code/terminal style — no cards or heavy borders)
+- Each row: type icon, title, type badge, date (updatedAt)
+- Separate sections for Items and Collections with item counts
+- Clicking an item opens the ItemDrawer; clicking a collection navigates to /collections/[id]
+- Empty state when no favorites exist
+- Sort by most recently favorited (updatedAt desc)
+
 ## Notes
+
+- UI style: monospace/semi-monospace font, minimal padding, subtle hover states, clean lines only
+- Follow existing AppShell + force-dynamic pattern used by /collections and /items/[type]
+- Proxy matcher needs /favorites added alongside /dashboard, /items, /collections, /settings
 
 ## History
 
