@@ -27,19 +27,21 @@ export function ItemEditForm({
   onSaved,
   collections,
   isPro = false,
+  initialContent,
 }: {
   detail: ItemDetail;
   onCancel: () => void;
   onSaved: (detail: ItemDetail) => void;
   collections: { id: string; name: string }[];
   isPro?: boolean;
+  initialContent?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
   const [title, setTitle] = useState(detail.title);
   const [description, setDescription] = useState(detail.description ?? "");
-  const [content, setContent] = useState(detail.content ?? "");
+  const [content, setContent] = useState(initialContent ?? detail.content ?? "");
   const [language, setLanguage] = useState(detail.language ?? "");
   const [url, setUrl] = useState(detail.url ?? "");
   const [tags, setTags] = useState(detail.tags.join(", "));

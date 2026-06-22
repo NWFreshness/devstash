@@ -57,6 +57,7 @@ export function ItemDetailView({
   isPro?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
+  const [pendingContent, setPendingContent] = useState<string | undefined>(undefined);
   const Icon = iconByName[detail.type.icon ?? ""] ?? Folder;
   const color = detail.type.color ?? FALLBACK_COLOR;
 
@@ -64,13 +65,15 @@ export function ItemDetailView({
     return (
       <ItemEditForm
         detail={detail}
-        onCancel={() => setEditing(false)}
+        onCancel={() => { setEditing(false); setPendingContent(undefined); }}
         onSaved={(updated) => {
           onUpdated(updated);
           setEditing(false);
+          setPendingContent(undefined);
         }}
         collections={collections}
         isPro={isPro}
+        initialContent={pendingContent}
       />
     );
   }
@@ -154,7 +157,17 @@ export function ItemDetailView({
                 typeSlug={detail.type.slug}
               />
             ) : MARKDOWN_TYPES.has(detail.type.slug) ? (
-              <MarkdownEditor value={detail.content} readOnly />
+              <MarkdownEditor
+                value={detail.content}
+                readOnly
+                isPro={isPro}
+                itemTitle={detail.title}
+                typeSlug={detail.type.slug}
+                onAcceptOptimization={(optimized) => {
+                  setPendingContent(optimized);
+                  setEditing(true);
+                }}
+              />
             ) : (
               <pre className="overflow-x-auto rounded-md border bg-muted/40 p-3 text-xs">
                 <code>{detail.content}</code>

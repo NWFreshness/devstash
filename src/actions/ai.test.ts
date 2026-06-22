@@ -10,7 +10,7 @@ vi.mock("@/lib/openai", () => ({
 import { auth } from "@/auth";
 import { checkAiRateLimit } from "@/lib/rate-limit";
 import { getOpenAIClient } from "@/lib/openai";
-import { generateAutoTags, explainCode } from "./ai";
+import { generateAutoTags, explainCode, optimizePrompt } from "./ai";
 
 const mockAuth = vi.mocked(auth);
 const mockCheckAiRateLimit = vi.mocked(checkAiRateLimit);
@@ -27,6 +27,68 @@ function makeClient(outputText: string) {
     },
   };
 }
+
+describe("optimizePrompt", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCheckAiRateLimit.mockResolvedValue(null);
+  });
+
+  it("returns Unauthorized when no session", async () => {
+    mockAuth.mockResolvedValue(null as never);
+    const result = await optimizePrompt({ title: "test", content: "Do X", typeSlug: "prompt" });
+    expect(result).toEqual({ success: false, error: "Unauthorized" });
+  });
+
+  it("returns Pro gate error for free users", async () => {
+    mockAuth.mockResolvedValue(makeSession(false) as never);
+    const result = await optimizePrompt({ title: "test", content: "Do X", typeSlug: "prompt" });
+    expect(result.success).toBe(false);
+    expect((result as { success: false; error: string }).error).toContain("Pro");
+  });
+
+  it("returns validation error for empty content", async () => {
+    mockAuth.mockResolvedValue(makeSession() as never);
+    const result = await optimizePrompt({ title: "test", content: "", typeSlug: "prompt" });
+    expect(result.success).toBe(false);
+  });
+
+  it("returns validation error for wrong typeSlug", async () => {
+    mockAuth.mockResolvedValue(makeSession() as never);
+    const result = await optimizePrompt({ title: "test", content: "Do X", typeSlug: "snippet" });
+    expect(result.success).toBe(false);
+  });
+
+  it("returns rate limit error when limit exceeded", async () => {
+    mockAuth.mockResolvedValue(makeSession() as never);
+    mockCheckAiRateLimit.mockResolvedValue("AI rate limit reached. Please try again in 30 minutes.");
+    const result = await optimizePrompt({ title: "test", content: "Do X", typeSlug: "prompt" });
+    expect(result).toEqual({
+      success: false,
+      error: "AI rate limit reached. Please try again in 30 minutes.",
+    });
+  });
+
+  it("returns optimized prompt text on success", async () => {
+    mockAuth.mockResolvedValue(makeSession() as never);
+    mockGetOpenAIClient.mockReturnValue(
+      makeClient("Improved version of the prompt with more clarity.") as never,
+    );
+    const result = await optimizePrompt({ title: "My Prompt", content: "Do X", typeSlug: "prompt" });
+    expect(result).toEqual({ success: true, data: "Improved version of the prompt with more clarity." });
+  });
+
+  it("returns AI service error on OpenAI failure", async () => {
+    mockAuth.mockResolvedValue(makeSession() as never);
+    mockGetOpenAIClient.mockReturnValue({
+      responses: {
+        create: vi.fn().mockRejectedValue(new Error("network error")),
+      },
+    } as never);
+    const result = await optimizePrompt({ title: "test", content: "Do X", typeSlug: "prompt" });
+    expect(result).toEqual({ success: false, error: "AI service error. Please try again." });
+  });
+});
 
 describe("generateAutoTags", () => {
   beforeEach(() => {

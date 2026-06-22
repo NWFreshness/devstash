@@ -115,6 +115,55 @@ export async function explainCode(
   }
 }
 
+const optimizePromptSchema = z.object({
+  title: z.string().min(1),
+  content: z.string().min(1),
+  typeSlug: z.literal("prompt"),
+});
+
+export async function optimizePrompt(
+  input: unknown,
+): Promise<ActionResult<string>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+  if (!session.user.isPro) {
+    return { success: false, error: "AI features require Pro subscription." };
+  }
+
+  const parsed = optimizePromptSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0].message };
+  }
+
+  const rateLimitError = await checkAiRateLimit(session.user.id);
+  if (rateLimitError) {
+    return { success: false, error: rateLimitError };
+  }
+
+  const { title, content } = parsed.data;
+  const truncatedContent = content.slice(0, 3000);
+
+  try {
+    const client = getOpenAIClient();
+    const response = await client.responses.create({
+      model: AI_MODEL,
+      instructions:
+        "You are a prompt engineering expert. Rewrite the given LLM prompt to be clearer, more specific, and more effective. Preserve the original intent. Return only the improved prompt text — no explanations, no labels, no quotes.",
+      input: `Optimize this prompt:\nTitle: ${title}\n\n${truncatedContent}`,
+    });
+
+    const optimized = response.output_text.trim();
+    if (!optimized) {
+      return { success: false, error: "No optimization generated. Please try again." };
+    }
+    return { success: true, data: optimized };
+  } catch {
+    return { success: false, error: "AI service error. Please try again." };
+  }
+}
+
 const generateAutoTagsSchema = z.object({
   title: z.string().min(1),
   content: z.string().optional(),
