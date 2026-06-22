@@ -1,12 +1,11 @@
-import { Folder, Lock, Plus } from "lucide-react";
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import { Folder, Plus } from "lucide-react";
+import { notFound, redirect } from "next/navigation";
 
 import { getItemsByType, getSystemType } from "@/lib/db/items";
 import { getDemoUser } from "@/lib/db/user";
 import { ITEMS_PER_PAGE, totalPages } from "@/lib/pagination";
 import { CREATE_ITEM_TYPES } from "@/lib/validations/item";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
 import { ItemCard } from "@/components/items/item-card";
 import { ImageThumbnailCard } from "@/components/items/image-thumbnail-card";
@@ -34,32 +33,7 @@ export default async function ItemsByTypePage({
   const user = await getDemoUser();
 
   if (PRO_ONLY_TYPES.has(typeSlug) && !user?.isPro) {
-    const Icon = iconByName[systemType.icon ?? ""] ?? Folder;
-    const color = systemType.color ?? FALLBACK_COLOR;
-    return (
-      <div className="mx-auto max-w-6xl space-y-8">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-md bg-muted">
-            <Icon className="size-5" style={{ color }} />
-          </div>
-          <h1 className="text-2xl font-semibold tracking-tight">{systemType.name}</h1>
-        </div>
-        <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed border-muted-foreground/30 py-20 text-center">
-          <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-            <Lock className="size-5 text-muted-foreground" />
-          </div>
-          <div className="space-y-1">
-            <p className="font-medium">Pro feature</p>
-            <p className="text-sm text-muted-foreground">
-              {systemType.name} storage is available on the Pro plan.
-            </p>
-          </div>
-          <Link href="/settings" className={buttonVariants({ size: "sm" })}>
-            Upgrade to Pro
-          </Link>
-        </div>
-      </div>
-    );
+    redirect("/upgrade");
   }
 
   const { items, total } = await getItemsByType(user?.id ?? null, typeSlug, page);

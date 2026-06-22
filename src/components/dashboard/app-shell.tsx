@@ -22,7 +22,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       sessionUserId
         ? prisma.user.findUnique({
             where: { id: sessionUserId },
-            select: { name: true, email: true, image: true, editorPreferences: true },
+            select: { name: true, email: true, image: true, editorPreferences: true, isPro: true },
           })
         : null,
       getItemTypeCounts(demoUserId),
@@ -48,6 +48,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
               collections={collectionsForSelect}
               searchItems={searchItems}
               searchCollections={searchCollections}
+              isPro={authUser?.isPro ?? session?.user?.isPro ?? false}
             />
             <main id="main-content" className="flex-1 overflow-auto p-6">{children}</main>
           </ItemDrawerProvider>

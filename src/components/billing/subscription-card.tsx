@@ -41,7 +41,10 @@ export function SubscriptionCard({ isPro, planRenewsAt }: SubscriptionCardProps)
     <Card>
       <CardHeader className="flex flex-row items-center gap-3">
         <CardTitle>Subscription</CardTitle>
-        <Badge variant={isPro ? "default" : "secondary"}>
+        <Badge
+          variant={isPro ? "default" : "secondary"}
+          className={isPro ? "bg-violet-600 text-white" : undefined}
+        >
           {isPro ? "Pro" : "Free"}
         </Badge>
       </CardHeader>
