@@ -43,7 +43,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       />
       <SidebarInset>
         <EditorPreferencesProvider prefs={editorPrefs}>
-          <ItemDrawerProvider collections={collectionsForSelect}>
+          <ItemDrawerProvider collections={collectionsForSelect} isPro={authUser?.isPro ?? session?.user?.isPro ?? false}>
             <TopBar
               collections={collectionsForSelect}
               searchItems={searchItems}

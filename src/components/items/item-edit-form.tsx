@@ -26,11 +26,13 @@ export function ItemEditForm({
   onCancel,
   onSaved,
   collections,
+  isPro = false,
 }: {
   detail: ItemDetail;
   onCancel: () => void;
   onSaved: (detail: ItemDetail) => void;
   collections: { id: string; name: string }[];
+  isPro?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -96,6 +98,7 @@ export function ItemEditForm({
         <ItemFormFields
           typeSlug={detail.type.slug}
           idPrefix="edit"
+          isPro={isPro}
           values={{ title, description, content, language, url, tags }}
           handlers={{
             onTitleChange: setTitle,

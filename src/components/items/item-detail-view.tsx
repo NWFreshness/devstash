@@ -48,11 +48,13 @@ export function ItemDetailView({
   onUpdated,
   onDeleted,
   collections,
+  isPro = false,
 }: {
   detail: ItemDetail;
   onUpdated: (detail: ItemDetail) => void;
   onDeleted: () => void;
   collections: { id: string; name: string }[];
+  isPro?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const Icon = iconByName[detail.type.icon ?? ""] ?? Folder;
@@ -68,6 +70,7 @@ export function ItemDetailView({
           setEditing(false);
         }}
         collections={collections}
+        isPro={isPro}
       />
     );
   }

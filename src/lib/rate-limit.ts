@@ -28,6 +28,7 @@ const limiters = {
   forgotPassword: makeRatelimit(3, 60 * 60),
   resetPassword: makeRatelimit(5, 15 * 60),
   resendVerification: makeRatelimit(3, 15 * 60),
+  aiTag: makeRatelimit(20, 60 * 60),
 } as const;
 
 type LimiterKey = keyof typeof limiters;
@@ -60,6 +61,26 @@ export async function checkRateLimit(
         headers: { "Retry-After": String(resetInSeconds) },
       },
     );
+  }
+
+  return null;
+}
+
+export async function checkAiRateLimit(userId: string): Promise<string | null> {
+  const limiter = limiters.aiTag;
+  if (!limiter) return null; // fail open when Upstash not configured
+
+  let result;
+  try {
+    result = await limiter.limit(userId);
+  } catch {
+    return null; // fail open on Upstash errors
+  }
+
+  if (!result.success) {
+    const resetInSeconds = Math.ceil((result.reset - Date.now()) / 1000);
+    const minutes = Math.ceil(resetInSeconds / 60);
+    return `AI rate limit reached. Please try again in ${minutes} minute${minutes === 1 ? "" : "s"}.`;
   }
 
   return null;

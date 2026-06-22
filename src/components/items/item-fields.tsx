@@ -1,7 +1,14 @@
 "use client";
 
+import { useState, useTransition } from "react";
+import { Check, Sparkles, X } from "lucide-react";
+import { toast } from "sonner";
+
 import type { CREATE_ITEM_TYPES } from "@/lib/validations/item";
 import { CONTENT_TYPES, LANGUAGE_TYPES, MARKDOWN_TYPES } from "@/lib/item-type-sets";
+import { generateAutoTags } from "@/actions/ai";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -79,6 +86,7 @@ interface ItemFormFieldsProps {
   values: ItemFieldValues;
   handlers: ItemFieldHandlers;
   idPrefix?: string;
+  isPro?: boolean;
 }
 
 export function ItemFormFields({
@@ -86,12 +94,47 @@ export function ItemFormFields({
   values,
   handlers,
   idPrefix = "field",
+  isPro = false,
 }: ItemFormFieldsProps) {
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
+  const [suggesting, startSuggesting] = useTransition();
+
   const showContent = CONTENT_TYPES.has(typeSlug);
   const showLanguage = LANGUAGE_TYPES.has(typeSlug);
   const showMarkdown = MARKDOWN_TYPES.has(typeSlug);
   const showUrl = typeSlug === "link";
   const showFileUpload = FILE_TYPES.has(typeSlug);
+
+  function handleSuggestTags() {
+    startSuggesting(async () => {
+      const result = await generateAutoTags({
+        title: values.title,
+        content: values.content || undefined,
+        typeSlug,
+      });
+      if (result.success) {
+        setSuggestedTags(result.data);
+      } else {
+        toast.error(result.error);
+      }
+    });
+  }
+
+  function acceptTag(tag: string) {
+    const existing = values.tags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    if (!existing.includes(tag)) {
+      const updated = [...existing, tag].join(", ");
+      handlers.onTagsChange(updated);
+    }
+    setSuggestedTags((prev) => prev.filter((t) => t !== tag));
+  }
+
+  function rejectTag(tag: string) {
+    setSuggestedTags((prev) => prev.filter((t) => t !== tag));
+  }
 
   return (
     <>
@@ -181,13 +224,56 @@ export function ItemFormFields({
       )}
 
       <div className="space-y-2">
-        <Label htmlFor={`${idPrefix}-tags`}>Tags</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor={`${idPrefix}-tags`}>Tags</Label>
+          {isPro && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-6 gap-1 px-2 text-xs text-muted-foreground"
+              onClick={handleSuggestTags}
+              disabled={suggesting || !values.title.trim()}
+            >
+              <Sparkles size={12} />
+              {suggesting ? "Suggesting..." : "Suggest Tags"}
+            </Button>
+          )}
+        </div>
         <Input
           id={`${idPrefix}-tags`}
           value={values.tags}
           onChange={(e) => handlers.onTagsChange(e.target.value)}
           placeholder="comma, separated, tags"
         />
+        {suggestedTags.length > 0 && (
+          <div className="flex flex-wrap gap-1 pt-1">
+            {suggestedTags.map((tag) => (
+              <span
+                key={tag}
+                className="flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-xs"
+              >
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => acceptTag(tag)}
+                  className="text-green-500 hover:text-green-400"
+                  aria-label={`Accept tag ${tag}`}
+                >
+                  <Check size={11} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => rejectTag(tag)}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label={`Reject tag ${tag}`}
+                >
+                  <X size={11} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );
