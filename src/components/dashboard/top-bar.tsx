@@ -42,7 +42,7 @@ export function TopBar({
           <Star size={16} aria-hidden />
         </Link>
         <CreateCollectionDialog />
-        <CreateItemDialog collections={collections} />
+        <CreateItemDialog collections={collections} isPro={isPro} />
       </div>
     </header>
   );

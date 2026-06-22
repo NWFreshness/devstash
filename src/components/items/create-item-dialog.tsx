@@ -42,12 +42,14 @@ interface CreateItemDialogProps {
   defaultType?: (typeof CREATE_ITEM_TYPES)[number];
   triggerElement?: React.ReactElement;
   collections?: { id: string; name: string }[];
+  isPro?: boolean;
 }
 
 export function CreateItemDialog({
   defaultType = "snippet",
   triggerElement,
   collections = [],
+  isPro = false,
 }: CreateItemDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -161,6 +163,7 @@ export function CreateItemDialog({
           <ItemFormFields
             typeSlug={typeSlug}
             idPrefix="create"
+            isPro={isPro}
             values={{ title, description, content, language, url, tags, uploadedFile }}
             handlers={{
               onTitleChange: setTitle,

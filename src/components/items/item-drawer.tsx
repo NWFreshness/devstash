@@ -30,9 +30,11 @@ function DrawerSkeleton() {
 export function ItemDrawerProvider({
   children,
   collections,
+  isPro = false,
 }: {
   children: React.ReactNode;
   collections: { id: string; name: string }[];
+  isPro?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<ItemDetail | null>(null);
@@ -60,6 +62,7 @@ export function ItemDrawerProvider({
               onUpdated={setDetail}
               onDeleted={() => setOpen(false)}
               collections={collections}
+              isPro={isPro}
             />
           )}
         </SheetContent>

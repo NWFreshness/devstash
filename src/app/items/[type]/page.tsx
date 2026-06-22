@@ -1,6 +1,7 @@
 import { Folder, Plus } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 
+import { auth } from "@/auth";
 import { getItemsByType, getSystemType } from "@/lib/db/items";
 import { getDemoUser } from "@/lib/db/user";
 import { ITEMS_PER_PAGE, totalPages } from "@/lib/pagination";
@@ -30,9 +31,10 @@ export default async function ItemsByTypePage({
   const systemType = await getSystemType(typeSlug);
   if (!systemType) notFound();
 
-  const user = await getDemoUser();
+  const [user, session] = await Promise.all([getDemoUser(), auth()]);
+  const isPro = session?.user?.isPro ?? false;
 
-  if (PRO_ONLY_TYPES.has(typeSlug) && !user?.isPro) {
+  if (PRO_ONLY_TYPES.has(typeSlug) && !isPro) {
     redirect("/upgrade");
   }
 
@@ -62,6 +64,7 @@ export default async function ItemsByTypePage({
         {isCreatable && (
           <CreateItemDialog
             defaultType={typeSlug as (typeof CREATE_ITEM_TYPES)[number]}
+            isPro={isPro}
             triggerElement={
               <Button size="sm">
                 <Plus />
