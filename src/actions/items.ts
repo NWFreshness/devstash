@@ -2,8 +2,8 @@
 
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 
-import { auth } from "@/auth";
 import { b2, B2_BUCKET } from "@/lib/b2";
+import { getAuthSession, parseOrError } from "@/lib/action-helpers";
 import {
   createItem as createItemQuery,
   deleteItem as deleteItemQuery,
@@ -16,23 +16,16 @@ import { getDemoUser } from "@/lib/db/user";
 import { prisma } from "@/lib/prisma";
 import { isAtItemLimit } from "@/lib/usage-limits";
 import { createItemSchema, updateItemSchema } from "@/lib/validations/item";
-
-type ActionResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
+import type { ActionResult } from "@/types/actions";
 
 export async function createItem(
   input: unknown,
 ): Promise<ActionResult<ItemDetail>> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const session = await getAuthSession();
+  if (!session) return { success: false, error: "Unauthorized" };
 
-  const parsed = createItemSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0].message };
-  }
+  const createParsed = parseOrError(createItemSchema, input);
+  if (!createParsed.ok) return { success: false, error: createParsed.error };
 
   // Items are seeded under the demo user, matching the rest of the app.
   const demoUser = await getDemoUser();
@@ -44,7 +37,7 @@ export async function createItem(
     }
   }
 
-  const created = await createItemQuery(demoUser?.id ?? null, parsed.data);
+  const created = await createItemQuery(demoUser?.id ?? null, createParsed.data);
   if (!created) {
     return { success: false, error: "Could not create item." };
   }
@@ -56,22 +49,18 @@ export async function updateItem(
   itemId: string,
   input: unknown,
 ): Promise<ActionResult<ItemDetail>> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const session = await getAuthSession();
+  if (!session) return { success: false, error: "Unauthorized" };
 
-  const parsed = updateItemSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0].message };
-  }
+  const updateParsed = parseOrError(updateItemSchema, input);
+  if (!updateParsed.ok) return { success: false, error: updateParsed.error };
 
   // Items are seeded under the demo user, matching the rest of the app.
   const demoUser = await getDemoUser();
   const updated = await updateItemQuery(
     demoUser?.id ?? null,
     itemId,
-    parsed.data,
+    updateParsed.data,
   );
   if (!updated) {
     return { success: false, error: "Item not found." };
@@ -83,10 +72,8 @@ export async function updateItem(
 export async function toggleItemFavorite(
   itemId: string,
 ): Promise<ActionResult<{ isFavorite: boolean }>> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const session = await getAuthSession();
+  if (!session) return { success: false, error: "Unauthorized" };
 
   const demoUser = await getDemoUser();
   const result = await toggleItemFavoriteQuery(demoUser?.id ?? null, itemId);
@@ -97,10 +84,8 @@ export async function toggleItemFavorite(
 export async function toggleItemPin(
   itemId: string,
 ): Promise<ActionResult<{ isPinned: boolean }>> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const session = await getAuthSession();
+  if (!session) return { success: false, error: "Unauthorized" };
 
   const demoUser = await getDemoUser();
   const result = await toggleItemPinQuery(demoUser?.id ?? null, itemId);
@@ -111,10 +96,8 @@ export async function toggleItemPin(
 export async function deleteItem(
   itemId: string,
 ): Promise<{ success: true } | { success: false; error: string }> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const session = await getAuthSession();
+  if (!session) return { success: false, error: "Unauthorized" };
 
   // Items are seeded under the demo user, matching the rest of the app.
   const demoUser = await getDemoUser();

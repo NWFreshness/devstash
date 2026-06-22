@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@/auth";
+import { getAuthSession, parseOrError } from "@/lib/action-helpers";
 import {
   createCollection as createCollectionQuery,
   deleteCollection as deleteCollectionQuery,
@@ -11,23 +11,16 @@ import { getDemoUser } from "@/lib/db/user";
 import { prisma } from "@/lib/prisma";
 import { isAtCollectionLimit } from "@/lib/usage-limits";
 import { createCollectionSchema, updateCollectionSchema } from "@/lib/validations/collection";
-
-type ActionResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
+import type { ActionResult } from "@/types/actions";
 
 export async function createCollection(
   input: unknown,
 ): Promise<ActionResult<{ id: string; name: string }>> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const session = await getAuthSession();
+  if (!session) return { success: false, error: "Unauthorized" };
 
-  const parsed = createCollectionSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0].message };
-  }
+  const createParsed = parseOrError(createCollectionSchema, input);
+  if (!createParsed.ok) return { success: false, error: createParsed.error };
 
   const demoUser = await getDemoUser();
 
@@ -38,7 +31,7 @@ export async function createCollection(
     }
   }
 
-  const created = await createCollectionQuery(demoUser?.id ?? null, parsed.data);
+  const created = await createCollectionQuery(demoUser?.id ?? null, createParsed.data);
   if (!created) {
     return { success: false, error: "Could not create collection." };
   }
@@ -50,21 +43,17 @@ export async function updateCollection(
   collectionId: string,
   input: unknown,
 ): Promise<ActionResult<{ id: string; name: string }>> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const session = await getAuthSession();
+  if (!session) return { success: false, error: "Unauthorized" };
 
-  const parsed = updateCollectionSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0].message };
-  }
+  const updateParsed = parseOrError(updateCollectionSchema, input);
+  if (!updateParsed.ok) return { success: false, error: updateParsed.error };
 
   const demoUser = await getDemoUser();
   const updated = await updateCollectionQuery(
     demoUser?.id ?? null,
     collectionId,
-    parsed.data,
+    updateParsed.data,
   );
   if (!updated) {
     return { success: false, error: "Collection not found." };
@@ -76,10 +65,8 @@ export async function updateCollection(
 export async function toggleCollectionFavorite(
   collectionId: string,
 ): Promise<ActionResult<{ isFavorite: boolean }>> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const session = await getAuthSession();
+  if (!session) return { success: false, error: "Unauthorized" };
 
   const demoUser = await getDemoUser();
   const result = await toggleCollectionFavoriteQuery(demoUser?.id ?? null, collectionId);
@@ -90,10 +77,8 @@ export async function toggleCollectionFavorite(
 export async function deleteCollection(
   collectionId: string,
 ): Promise<{ success: true } | { success: false; error: string }> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const session = await getAuthSession();
+  if (!session) return { success: false, error: "Unauthorized" };
 
   const demoUser = await getDemoUser();
   const deleted = await deleteCollectionQuery(demoUser?.id ?? null, collectionId);
