@@ -13,6 +13,8 @@ import {
   type ItemDetail,
 } from "@/lib/db/items";
 import { getDemoUser } from "@/lib/db/user";
+import { prisma } from "@/lib/prisma";
+import { isAtItemLimit } from "@/lib/usage-limits";
 import { createItemSchema, updateItemSchema } from "@/lib/validations/item";
 
 type ActionResult<T> =
@@ -34,6 +36,14 @@ export async function createItem(
 
   // Items are seeded under the demo user, matching the rest of the app.
   const demoUser = await getDemoUser();
+
+  if (!session.user.isPro) {
+    const itemCount = await prisma.item.count({ where: { userId: demoUser?.id ?? "" } });
+    if (isAtItemLimit(false, itemCount)) {
+      return { success: false, error: "Free plan limit reached (50 items). Upgrade to Pro for unlimited items." };
+    }
+  }
+
   const created = await createItemQuery(demoUser?.id ?? null, parsed.data);
   if (!created) {
     return { success: false, error: "Could not create item." };

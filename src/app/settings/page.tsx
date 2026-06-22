@@ -9,6 +9,8 @@ import { getProfileUser } from "@/lib/db/profile";
 import { ChangePasswordForm } from "@/components/profile/change-password-form";
 import { DeleteAccountSection } from "@/components/profile/delete-account-section";
 import { EditorPreferencesForm } from "@/components/settings/editor-preferences-form";
+import { SubscriptionCard } from "@/components/billing/subscription-card";
+import { getUserBilling } from "@/lib/db/billing";
 import { prisma } from "@/lib/prisma";
 import { parseEditorPreferences } from "@/types/editor-preferences";
 
@@ -18,12 +20,13 @@ export default async function SettingsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/sign-in");
 
-  const [profileUser, userRow] = await Promise.all([
+  const [profileUser, userRow, billing] = await Promise.all([
     getProfileUser(session.user.id),
     prisma.user.findUnique({
       where: { id: session.user.id },
       select: { editorPreferences: true },
     }),
+    getUserBilling(session.user.id),
   ]);
   if (!profileUser) redirect("/sign-in");
 
@@ -42,6 +45,12 @@ export default async function SettingsPage() {
         </Button>
         <h1 className="text-xl font-semibold">Settings</h1>
       </div>
+
+      {/* Subscription */}
+      <SubscriptionCard
+        isPro={billing?.isPro ?? false}
+        planRenewsAt={billing?.planRenewsAt ?? null}
+      />
 
       {/* Editor preferences */}
       <Card>

@@ -8,6 +8,8 @@ import {
   updateCollection as updateCollectionQuery,
 } from "@/lib/db/collections";
 import { getDemoUser } from "@/lib/db/user";
+import { prisma } from "@/lib/prisma";
+import { isAtCollectionLimit } from "@/lib/usage-limits";
 import { createCollectionSchema, updateCollectionSchema } from "@/lib/validations/collection";
 
 type ActionResult<T> =
@@ -28,6 +30,14 @@ export async function createCollection(
   }
 
   const demoUser = await getDemoUser();
+
+  if (!session.user.isPro) {
+    const collectionCount = await prisma.collection.count({ where: { userId: demoUser?.id ?? "" } });
+    if (isAtCollectionLimit(false, collectionCount)) {
+      return { success: false, error: "Free plan limit reached (3 collections). Upgrade to Pro for unlimited collections." };
+    }
+  }
+
   const created = await createCollectionQuery(demoUser?.id ?? null, parsed.data);
   if (!created) {
     return { success: false, error: "Could not create collection." };
