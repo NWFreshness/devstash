@@ -1,36 +1,16 @@
-# Current Feature: UI Accessibility & Polish
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Fix scroll animation invisible-sections bug (progressive enhancement)
-- Fix navbar: replace Unicode hamburger icons with lucide Menu/X, add AI nav link
-- Add social proof / reassurance strip to hero above the fold
-- Fix features section: replace emoji/Unicode icons with lucide icons; fix Instant Search accent color
-- Fix pricing toggle: add `role="switch"` and `aria-checked` for screen readers
-- Fix footer links: add `py-1` padding for 44px minimum tap targets
-- Fix AI section `<pre>` block: add `role="img"` + `aria-label` for screen readers
-- Add per-page `<meta name="description">` to homepage
-- Fix TopBar favorites link: add `aria-label="Favorites"`
-- Fix PRO badge contrast (too small at 9.6px, low contrast) and sidebar sub-labels (11.2px → `text-xs`)
-- Fix `ItemRow` nested `<button>` inside `<button>` invalid HTML — restructure outer as div
-- Fix `CollectionCard` keyboard navigation (tabIndex + onKeyDown)
-- Fix `formatDate` to include year when different from current year; add `dateTime` attribute to `<time>` elements
-- Add empty state to dashboard for users with no items/collections
-- Add skip-to-main-content link to both marketing and dashboard layouts
+<!-- Add feature goals here -->
 
 ## Notes
 
-- Dark mode toggle is out of scope (larger feature requiring theme context + DB storage)
-- Hero mobile visual hierarchy improvement deferred (design risk without live visual feedback)
-- Logo glyph inconsistency (`⌗` vs `<Box>`) deferred (requires custom SVG logo)
-- All 30 findings from ui-reviewer audit addressed except the 3 deferred items above
-- No new dependencies needed — lucide-react already installed
-- Feature card lucide icons: Code2, MessageSquare, Search, Terminal, Paperclip, FolderOpen
-- Instant Search accent color changed from `#a855f7` (not in type system) to `#22c55e` (note type green)
+<!-- Add implementation notes here -->
 
 ## History
 
@@ -59,3 +39,5 @@ In Progress
 - Auth UI - Sign In, Register & Sign Out (auth phase 3): replaced NextAuth default pages with custom UI. New `(auth)` route group with a centered-card layout plus `/sign-in` and `/register` pages; client forms in `src/components/auth/` use `next-auth/react` signIn (credentials with `redirect:false` + inline errors, GitHub via redirect) and the register form posts to `/api/auth/register` (reuses the Zod registerSchema) then redirects to `/sign-in`. `auth.config.ts` sets `pages.signIn:"/sign-in"`; `proxy.ts` redirects unauthenticated users there and its matcher now also protects `/profile`. Reusable `src/components/user-avatar.tsx` (GitHub image or initials). Sidebar footer (`app-sidebar.tsx`) now: avatar+name link to `/profile`, gear opens a shadcn DropdownMenu (Base UI) with Profile + Sign out (`signOut({redirectTo:"/sign-in"})`); it takes the authenticated session user, resolved via `auth()` in the dashboard layout (data queries still use the demo user - per-user data out of scope). New minimal `/profile` page (session user). Added shadcn dropdown-menu + label. Security: sign-in form sanitizes `callbackUrl` to a same-origin relative path (`safeRelative`) to prevent open redirects. Gotchas: lucide-react 1.16 dropped the GitHub brand icon (inline SVG used); Base UI Button rendered as a Link needs `nativeButton={false}` to avoid a console warning. Build passes; all 7 spec test steps verified in-browser.
 - Email Verification on Register; Email Verification Toggle; Forgot Password; Profile Page; Rate Limiting for Auth; Items List View; Vitest Setup; Items List 3-Column Grid; Item Drawer; Item Drawer Edit Mode; Delete Item; Item Create; Code Editor + Type Add Button; Image Gallery View; File List View; Copy Icon on Cards; Codebase Audit Fixes; Collection Create; Collection Assignment on Items; Collections Pages; Collection Actions; Global Search / Command Palette; Settings Page; Editor Preferences Settings; Favorite Toggle; Favorites Page; Pinned Items
 - Homepage: public-facing marketing page at `/` (authenticated users redirect to `/dashboard`). `src/app/(marketing)/page.tsx` with bare layout. Components in `src/components/marketing/`: Navbar (sticky + scroll opacity, mobile hamburger), Hero (headline + ChaosCanvas animation + dashboard mockup), Features (6 cards), AiSection (two-column with code mockup), Pricing (monthly/yearly toggle via PricingToggle client component), CtaSection, Footer, ScrollAnimations (IntersectionObserver fade-in-up). Scroll animation keyframe in `globals.css`. ChaosCanvas ports the prototype physics (bouncing icons, mouse repulsion) into a `useEffect`+`useRef` canvas component. Type accent colors as constants. No Monaco on marketing page — AI section code block is static `<pre>`. No new shadcn components beyond Button. Build passes.
+
+- UI Accessibility & Polish: addressed 27 of 30 findings from ui-reviewer audit (3 deferred: dark mode toggle, hero mobile layout, logo inconsistency). Homepage: scroll animations use progressive enhancement (elements visible by default for SSR/crawlers; JS adds `anim-ready` before observing); navbar hamburger replaced with lucide `Menu`/`X`; AI nav link added; hero reassurance strip added above fold; feature cards use lucide icons with type-system accent colors (Instant Search fixed from `#a855f7` → `#22c55e`); pricing toggle gains `role="switch"` + `aria-checked`; footer links get `py-1` tap targets; AI section `<pre>` gets `role="img"` + `aria-label`; per-page `<meta name="description">` added. Dashboard: `ItemRow` outer element changed from `<button>` to `div[role=button]` to fix invalid nested-button HTML, keyboard handler added; `CollectionCard` gains `tabIndex` + `onKeyDown` for keyboard nav; `TopBar` favorites link gets `aria-label`; PRO badge font size and contrast improved; sidebar sub-labels increased to `text-xs`; `formatDate` now includes year for items from prior years; `<time>` elements gain `dateTime` attribute; empty state added for users with no data. Both layouts: skip-to-main-content link in root layout; `<main id="main-content">` in dashboard shell and marketing page. 36 tests green; build passes.
