@@ -74,7 +74,7 @@ function CollectionList({
   if (collections.length === 0) return null;
   return (
     <>
-      <div className="px-2 pt-1 pb-1 text-[0.7rem] font-medium tracking-wide text-sidebar-foreground/50">
+      <div className="px-2 pt-1 pb-1 text-xs font-medium tracking-wide text-sidebar-foreground/50">
         {label}
       </div>
       <SidebarMenu>
@@ -130,7 +130,7 @@ export function AppSidebar({ user, itemTypes, collections }: AppSidebarProps) {
                           {PRO_TYPE_SLUGS.has(type.slug) && (
                             <Badge
                               variant="secondary"
-                              className="h-4 px-1.5 text-[0.6rem] font-semibold tracking-wide text-muted-foreground"
+                              className="h-4 px-1.5 text-[0.65rem] font-semibold tracking-wide text-foreground/60"
                             >
                               PRO
                             </Badge>
