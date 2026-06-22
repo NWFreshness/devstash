@@ -8,6 +8,43 @@ import { Textarea } from "@/components/ui/textarea";
 import { CodeEditor } from "@/components/ui/code-editor";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { FileUpload, type UploadedFile } from "@/components/ui/file-upload";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const LANGUAGES = [
+  { value: "plaintext", label: "Plain Text" },
+  { value: "bash", label: "Bash / Shell" },
+  { value: "c", label: "C" },
+  { value: "cpp", label: "C++" },
+  { value: "csharp", label: "C#" },
+  { value: "css", label: "CSS" },
+  { value: "dockerfile", label: "Dockerfile" },
+  { value: "go", label: "Go" },
+  { value: "graphql", label: "GraphQL" },
+  { value: "html", label: "HTML" },
+  { value: "java", label: "Java" },
+  { value: "javascript", label: "JavaScript" },
+  { value: "json", label: "JSON" },
+  { value: "kotlin", label: "Kotlin" },
+  { value: "lua", label: "Lua" },
+  { value: "markdown", label: "Markdown" },
+  { value: "php", label: "PHP" },
+  { value: "powershell", label: "PowerShell" },
+  { value: "python", label: "Python" },
+  { value: "ruby", label: "Ruby" },
+  { value: "rust", label: "Rust" },
+  { value: "sql", label: "SQL" },
+  { value: "swift", label: "Swift" },
+  { value: "toml", label: "TOML" },
+  { value: "typescript", label: "TypeScript" },
+  { value: "xml", label: "XML" },
+  { value: "yaml", label: "YAML" },
+];
 
 const FILE_TYPES = new Set(["file", "image"]);
 
@@ -89,6 +126,27 @@ export function ItemFormFields({
         </div>
       )}
 
+      {showLanguage && (
+        <div className="space-y-2">
+          <Label htmlFor={`${idPrefix}-language`}>Language</Label>
+          <Select
+            value={values.language || "plaintext"}
+            onValueChange={(v) => handlers.onLanguageChange(v ?? "plaintext")}
+          >
+            <SelectTrigger id={`${idPrefix}-language`} className="w-full">
+              <SelectValue placeholder="Select language" />
+            </SelectTrigger>
+            <SelectContent>
+              {LANGUAGES.map((lang) => (
+                <SelectItem key={lang.value} value={lang.value}>
+                  {lang.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
       {showContent && (
         <div className="space-y-2">
           <Label>Content</Label>
@@ -96,7 +154,7 @@ export function ItemFormFields({
             <CodeEditor
               value={values.content}
               onChange={handlers.onContentChange}
-              language={values.language || undefined}
+              language={values.language || "plaintext"}
             />
           ) : showMarkdown ? (
             <MarkdownEditor value={values.content} onChange={handlers.onContentChange} />
@@ -108,17 +166,6 @@ export function ItemFormFields({
               className="min-h-40 font-mono text-xs"
             />
           )}
-        </div>
-      )}
-
-      {showLanguage && (
-        <div className="space-y-2">
-          <Label htmlFor={`${idPrefix}-language`}>Language</Label>
-          <Input
-            id={`${idPrefix}-language`}
-            value={values.language}
-            onChange={(e) => handlers.onLanguageChange(e.target.value)}
-          />
         </div>
       )}
 

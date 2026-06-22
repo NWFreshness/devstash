@@ -2,15 +2,22 @@
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Add feature goals here -->
+- Replace the plain text language `<Input>` with a `<Select>` dropdown of common languages for snippet and command item types
+- Move the language selector above the content/CodeEditor so it's visible before typing
+- Selecting a language immediately applies Monaco syntax highlighting in the editor as you type
+- Applies to both the Create Item modal and the Edit Item drawer form
 
 ## Notes
 
-<!-- Add implementation notes here -->
+- Changed only `src/components/items/item-fields.tsx`
+- Added `LANGUAGES` array (27 entries: plaintext → yaml)
+- Language Select uses shadcn `<Select>` with the existing Select components already imported in other places; added import here
+- Language block moved above the `showContent` block so the dropdown appears above the editor
+- Default value falls back to `"plaintext"` when `values.language` is empty so the Select always has a valid selection
 
 ## History
 
