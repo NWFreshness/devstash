@@ -10,7 +10,7 @@ vi.mock("@/lib/openai", () => ({
 import { auth } from "@/auth";
 import { checkAiRateLimit } from "@/lib/rate-limit";
 import { getOpenAIClient } from "@/lib/openai";
-import { generateAutoTags } from "./ai";
+import { generateAutoTags, explainCode } from "./ai";
 
 const mockAuth = vi.mocked(auth);
 const mockCheckAiRateLimit = vi.mocked(checkAiRateLimit);
@@ -108,6 +108,68 @@ describe("generateAutoTags", () => {
       },
     } as never);
     const result = await generateAutoTags({ title: "test", typeSlug: "snippet" });
+    expect(result).toEqual({ success: false, error: "AI service error. Please try again." });
+  });
+});
+
+describe("explainCode", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCheckAiRateLimit.mockResolvedValue(null);
+  });
+
+  it("returns Unauthorized when no session", async () => {
+    mockAuth.mockResolvedValue(null as never);
+    const result = await explainCode({ title: "test", content: "console.log('hi')", typeSlug: "snippet" });
+    expect(result).toEqual({ success: false, error: "Unauthorized" });
+  });
+
+  it("returns Pro gate error for free users", async () => {
+    mockAuth.mockResolvedValue(makeSession(false) as never);
+    const result = await explainCode({ title: "test", content: "console.log('hi')", typeSlug: "snippet" });
+    expect(result.success).toBe(false);
+    expect((result as { success: false; error: string }).error).toContain("Pro");
+  });
+
+  it("returns validation error for empty content", async () => {
+    mockAuth.mockResolvedValue(makeSession() as never);
+    const result = await explainCode({ title: "test", content: "", typeSlug: "snippet" });
+    expect(result.success).toBe(false);
+  });
+
+  it("returns validation error for invalid typeSlug", async () => {
+    mockAuth.mockResolvedValue(makeSession() as never);
+    const result = await explainCode({ title: "test", content: "code", typeSlug: "note" });
+    expect(result.success).toBe(false);
+  });
+
+  it("returns rate limit error when limit exceeded", async () => {
+    mockAuth.mockResolvedValue(makeSession() as never);
+    mockCheckAiRateLimit.mockResolvedValue("AI rate limit reached. Please try again in 30 minutes.");
+    const result = await explainCode({ title: "test", content: "code", typeSlug: "snippet" });
+    expect(result).toEqual({
+      success: false,
+      error: "AI rate limit reached. Please try again in 30 minutes.",
+    });
+  });
+
+  it("returns explanation text on success", async () => {
+    mockAuth.mockResolvedValue(makeSession() as never);
+    mockGetOpenAIClient.mockReturnValue(
+      makeClient("This snippet logs 'hello' to the console.") as never,
+    );
+    const result = await explainCode({ title: "Hello World", content: "console.log('hello')", typeSlug: "snippet" });
+    expect(result).toEqual({ success: true, data: "This snippet logs 'hello' to the console." });
+  });
+
+  it("returns AI service error on OpenAI failure", async () => {
+    mockAuth.mockResolvedValue(makeSession() as never);
+    mockGetOpenAIClient.mockReturnValue({
+      responses: {
+        create: vi.fn().mockRejectedValue(new Error("network error")),
+      },
+    } as never);
+    const result = await explainCode({ title: "test", content: "code", typeSlug: "command" });
     expect(result).toEqual({ success: false, error: "AI service error. Please try again." });
   });
 });

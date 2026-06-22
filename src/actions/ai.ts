@@ -64,6 +64,57 @@ export async function generateDescription(
   }
 }
 
+const explainCodeSchema = z.object({
+  title: z.string().min(1),
+  content: z.string().min(1),
+  typeSlug: z.enum(["snippet", "command"]),
+  language: z.string().optional(),
+});
+
+export async function explainCode(
+  input: unknown,
+): Promise<ActionResult<string>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+  if (!session.user.isPro) {
+    return { success: false, error: "AI features require Pro subscription." };
+  }
+
+  const parsed = explainCodeSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0].message };
+  }
+
+  const rateLimitError = await checkAiRateLimit(session.user.id);
+  if (rateLimitError) {
+    return { success: false, error: rateLimitError };
+  }
+
+  const { title, content, typeSlug, language } = parsed.data;
+  const truncatedContent = content.slice(0, 3000);
+  const langHint = language && language !== "plaintext" ? ` (${language})` : "";
+
+  try {
+    const client = getOpenAIClient();
+    const response = await client.responses.create({
+      model: AI_MODEL,
+      instructions:
+        "You are a developer assistant. Explain the given code or command concisely in 200-300 words. Cover what it does, how it works, and any key concepts. Use markdown formatting.",
+      input: `Explain this ${typeSlug}${langHint}:\nTitle: ${title}\n\n\`\`\`\n${truncatedContent}\n\`\`\``,
+    });
+
+    const explanation = response.output_text.trim();
+    if (!explanation) {
+      return { success: false, error: "No explanation generated. Please try again." };
+    }
+    return { success: true, data: explanation };
+  } catch {
+    return { success: false, error: "AI service error. Please try again." };
+  }
+}
+
 const generateAutoTagsSchema = z.object({
   title: z.string().min(1),
   content: z.string().optional(),

@@ -149,6 +149,9 @@ export function ItemDetailView({
                 value={detail.content}
                 language={detail.language ?? undefined}
                 readOnly
+                isPro={isPro}
+                itemTitle={detail.title}
+                typeSlug={detail.type.slug}
               />
             ) : MARKDOWN_TYPES.has(detail.type.slug) ? (
               <MarkdownEditor value={detail.content} readOnly />
