@@ -1,29 +1,20 @@
-# Current Feature: AI Description Generator
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add a small icon button next to the description field in item forms (both Create and Edit)
-- Clicking the button calls an AI action that reads the current title and content inputs
-- AI generates a 1-2 sentence concise description and populates the description field
-- Works for all item types using whatever information is available (title, content, url, etc.)
-- No save required before generating — reads live form values
-- Pro-only feature, gated the same way as AI auto-tagging
+<!-- Add feature goals here -->
 
 ## Notes
 
-- Mirror the pattern used by AI auto-tagging (`generateAutoTags` in `src/actions/ai.ts`)
-- Use `gpt-5-nano` via the existing OpenAI singleton in `src/lib/openai.ts`
-- Prompt should instruct the model to return a plain 1-2 sentence description (no JSON wrapper needed)
-- Button should be a small icon (e.g. Sparkles or Wand2) placed inline with the Description label, similar to the "Suggest Tags" button
-- Apply the existing AI rate limiter pattern (`checkAiRateLimit`)
-- If title and content are both empty, disable or skip the call gracefully
-- `ItemFormFields` in `src/components/items/item-fields.tsx` is where the UI change goes
+<!-- Add implementation notes here -->
 
 ## History
+
+- AI Description Generator: new `generateDescription` server action in `src/actions/ai.ts` (auth, Pro gate, Zod validation, rate limiting via `checkAiRateLimit`, OpenAI Responses API with plain-text output, builds context from title + content + url); `ItemFormFields` in `src/components/items/item-fields.tsx` gains a "Generate" button (Wand2 icon, ghost/sm) inline with the Description label when `isPro=true`; disabled until title is non-empty; on success populates the description field directly. Applies to both Create and Edit flows. 53 tests pass; build passes.
 
 - AI Auto-Tagging: new `src/lib/openai.ts` (OpenAI singleton, `AI_MODEL = 'gpt-5-nano'`); new `src/actions/ai.ts` (`generateAutoTags` server action — auth, Pro gate, Zod validation, rate limiting, OpenAI Responses API with `json_object` format, handles both `{"tags":[...]}` and `[...]` response shapes, normalizes to lowercase, caps at 5 tags); AI rate limiter added to `src/lib/rate-limit.ts` (`aiTag`: 20 req/hour per user, new `checkAiRateLimit(userId)` export). UI: `isPro` prop threaded from `AppShell` → `ItemDrawerProvider` → `ItemDetailView` → `ItemEditForm`, and `TopBar` → `CreateItemDialog`; `items/[type]/page.tsx` fetches `isPro` from session. `ItemFormFields` renders a "Suggest Tags" button (Sparkles icon, ghost/sm) next to the Tags label when `isPro=true`; suggested tags appear as inline badges with per-tag accept (Check) and reject (X) controls; accepted tags are appended to the comma-separated tags string. `openai` package added. `OPENAI_API_KEY` documented in `.env.example`. 53 tests pass; build passes.
 
