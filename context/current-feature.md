@@ -1,44 +1,20 @@
-# Current Feature: Stripe Phase 2 — API Routes, Enforcement & UI
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Checkout API route (`POST /api/billing/checkout`): creates Stripe Checkout session for monthly or yearly subscription
-- Portal API route (`POST /api/billing/portal`): opens Stripe Customer Portal for subscription management
-- Webhook handler (`POST /api/webhooks/stripe`): syncs `isPro`, `stripeCustomerId`, `stripeSubscriptionId`, `planRenewsAt` from Stripe events
-- Free-tier limits enforced in `createItem` (50 items) and `createCollection` (3 collections) server actions
-- File upload route (`/api/upload`) returns 403 for free users
-- `SubscriptionCard` component in Settings page showing plan status and upgrade/manage buttons
-- `UpgradeCta` inline component for limit-hit messaging
+<!-- Add feature goals here -->
 
 ## Notes
 
-### API Routes
-- Checkout: accepts `{ interval: "monthly" | "yearly" }`, passes existing `stripeCustomerId` if present, sets `metadata.userId`, returns `{ url }`
-- Portal: returns 400 if no `stripeCustomerId`, returns `{ url }`
-- Webhook: use `req.text()` (not `req.json()`) for raw body — required for Stripe signature verification; add `export const dynamic = "force-dynamic"`
-
-### Webhook Events
-- `checkout.session.completed` → store `stripeCustomerId`, set `isPro: true`
-- `customer.subscription.created/updated` → set `isPro` based on `status === "active" || "trialing"`; update `stripeSubscriptionId`, `planRenewsAt` (from `current_period_end * 1000`)
-- `customer.subscription.deleted` → set `isPro: false`, clear `stripeSubscriptionId` and `planRenewsAt`
-
-### SubscriptionCard
-- Free state: "Free" badge, limit descriptions, two buttons ("Upgrade — $8/mo" and "$72/yr (save 25%)")
-- Pro state: "Pro" badge, renewal date, one "Manage subscription" button
-- Single `loading` boolean covers all buttons
-
-### UpgradeCta
-- Simple dashed-border box, reason text, link to `/settings`. No interactivity.
-
-### Free-tier counts use `demoUser.id` for now (multi-user data queries out of scope)
-### Stripe Customer Portal must be enabled in Stripe Dashboard before portal calls succeed
-### Local webhook testing: `stripe listen --forward-to localhost:3333/api/webhooks/stripe`
+<!-- Add implementation notes here -->
 
 ## History
+
+- Stripe Phase 2 — API Routes, Enforcement & UI: new `src/app/api/billing/checkout/route.ts` (POST creates Stripe Checkout session for monthly/yearly, passes existing `stripeCustomerId` if present, sets `metadata.userId`); new `src/app/api/billing/portal/route.ts` (POST opens Stripe Customer Portal, 400 if no customer); new `src/app/api/webhooks/stripe/route.ts` (uses `req.text()` for raw body, handles `checkout.session.completed` → set `isPro: true` + store `stripeCustomerId`; `customer.subscription.created/updated` → sync `isPro`/`stripeSubscriptionId`/`planRenewsAt` from `subscription.items.data[0].current_period_end`; `customer.subscription.deleted` → clear all). Free-tier enforcement: `createItem` checks 50-item limit via `isAtItemLimit`, `createCollection` checks 3-collection limit via `isAtCollectionLimit`; `/api/upload` returns 403 for non-Pro users. New `src/components/billing/subscription-card.tsx`: client component with Free/Pro states, single `loading` boolean, two upgrade buttons (monthly/yearly) or one manage button. New `src/components/billing/upgrade-cta.tsx`: dashed-border inline CTA with link to `/settings`. Settings page fetches `getUserBilling` in `Promise.all` and renders `SubscriptionCard` as first card. Note: `current_period_end` moved to `subscription.items.data[0]` in Stripe API `2026-05-27.dahlia`. 44 tests green; build passes.
 
 - Pagination: new `src/lib/pagination.ts` exports `ITEMS_PER_PAGE=21`, `COLLECTIONS_PER_PAGE=21`, `DASHBOARD_COLLECTIONS_LIMIT=6`, `DASHBOARD_RECENT_ITEMS_LIMIT=10`, and a `totalPages()` helper. `getItemsByType` and `getItemsByCollection` in `items.ts` now accept a `page` param and return `{ items, total }` via `Promise.all([findMany, count])` — fetching only one page at a time. New `src/components/ui/pagination.tsx`: `<Pagination>` renders numbered page links + prev/next as `<Link>` elements (disabled/greyed when unavailable), with ellipsis for large page counts. `/items/[type]` and `/collections/[id]` pages read `searchParams.page`, pass it to the DB helpers, and render `<Pagination>` at the bottom. Dashboard page now uses named constants instead of magic numbers. 36 tests still green; build passes.
 
