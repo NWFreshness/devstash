@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
   Box,
   ChevronDown,
   Folder,
   FolderOpen,
+  LayoutDashboard,
   LogOut,
   Settings,
   Star,
@@ -63,11 +65,13 @@ type SidebarCollection = SidebarCollections["favorites"][number];
 function CollectionList({
   label,
   collections,
+  pathname,
   renderIcon,
   renderBadge,
 }: {
   label: string;
   collections: SidebarCollection[];
+  pathname: string;
   renderIcon: (collection: SidebarCollection) => React.ReactNode;
   renderBadge: (collection: SidebarCollection) => React.ReactNode;
 }) {
@@ -78,15 +82,21 @@ function CollectionList({
         {label}
       </div>
       <SidebarMenu>
-        {collections.map((collection) => (
-          <SidebarMenuItem key={collection.id}>
-            <SidebarMenuButton render={<Link href={`/collections/${collection.id}`} />}>
-              {renderIcon(collection)}
-              <span>{collection.name}</span>
-            </SidebarMenuButton>
-            <SidebarMenuBadge>{renderBadge(collection)}</SidebarMenuBadge>
-          </SidebarMenuItem>
-        ))}
+        {collections.map((collection) => {
+          const href = `/collections/${collection.id}`;
+          return (
+            <SidebarMenuItem key={collection.id}>
+              <SidebarMenuButton
+                render={<Link href={href} />}
+                isActive={pathname === href}
+              >
+                {renderIcon(collection)}
+                <span>{collection.name}</span>
+              </SidebarMenuButton>
+              <SidebarMenuBadge>{renderBadge(collection)}</SidebarMenuBadge>
+            </SidebarMenuItem>
+          );
+        })}
       </SidebarMenu>
     </>
   );
@@ -98,6 +108,7 @@ const chevron = (
 
 export function AppSidebar({ user, itemTypes, collections }: AppSidebarProps) {
   const { favorites, recents } = collections;
+  const pathname = usePathname();
   const displayName = user?.name ?? user?.email ?? "";
   return (
     <Sidebar>
@@ -108,6 +119,17 @@ export function AppSidebar({ user, itemTypes, collections }: AppSidebarProps) {
           </div>
           <span className="text-base font-semibold">DevStash</span>
         </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={<Link href="/dashboard" />}
+              isActive={pathname === "/dashboard"}
+            >
+              <LayoutDashboard />
+              <span>Dashboard</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent>
@@ -122,9 +144,13 @@ export function AppSidebar({ user, itemTypes, collections }: AppSidebarProps) {
                 <SidebarMenu>
                   {itemTypes.map((type) => {
                     const Icon = iconByName[type.icon ?? ""] ?? Folder;
+                    const href = `/items/${type.slug}`;
                     return (
                       <SidebarMenuItem key={type.id}>
-                        <SidebarMenuButton render={<Link href={`/items/${type.slug}`} />}>
+                        <SidebarMenuButton
+                          render={<Link href={href} />}
+                          isActive={pathname === href}
+                        >
                           <Icon style={{ color: type.color ?? undefined }} />
                           <span className="capitalize">{type.name}</span>
                           {PRO_TYPE_SLUGS.has(type.slug) && (
@@ -157,6 +183,7 @@ export function AppSidebar({ user, itemTypes, collections }: AppSidebarProps) {
                 <CollectionList
                   label="Favorites"
                   collections={favorites}
+                  pathname={pathname}
                   renderIcon={(c) => (
                     <Folder style={{ color: c.primaryColor ?? undefined }} />
                   )}
@@ -167,6 +194,7 @@ export function AppSidebar({ user, itemTypes, collections }: AppSidebarProps) {
                 <CollectionList
                   label="Recents"
                   collections={recents}
+                  pathname={pathname}
                   renderIcon={(c) => (
                     <span
                       aria-hidden

@@ -20,10 +20,12 @@ export function ItemCard({ item }: { item: ItemWithMeta }) {
   }
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => openItem(item.id)}
-      className="group flex flex-col gap-3 rounded-lg border-l-2 p-4 text-left ring-1 ring-foreground/10 transition-colors hover:bg-muted/50"
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && openItem(item.id)}
+      className="group flex flex-col gap-3 rounded-lg border-l-2 p-4 text-left ring-1 ring-foreground/10 transition-colors hover:bg-muted/50 cursor-pointer"
       style={{ borderLeftColor: color }}
     >
       <div className="flex items-start gap-3">
@@ -69,6 +71,6 @@ export function ItemCard({ item }: { item: ItemWithMeta }) {
           </Badge>
         ))}
       </div>
-    </button>
+    </div>
   );
 }
