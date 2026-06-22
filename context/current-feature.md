@@ -1,31 +1,20 @@
-# Current Feature: AI Explain Code
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- `explainCode` server action with auth, Pro gating, Zod validation, and rate limiting
-- "Explain" button (Sparkles icon) in code editor window controls header, next to Copy button
-- Only shown for snippet and command types in the item drawer read view (not create/edit forms)
-- After generating, Code/Explain tabs in editor header to toggle between views
-- Explanation rendered as markdown in the same container space as the code editor
-- Explanation is concise (~200–300 words) covering what the code does and key concepts
-- Loading state: Loader2 spinner while generating
-- Pro gating in UI: Crown icon + tooltip ("AI features require Pro subscription") for free users
-- Error handling via toast (Pro gating, rate limit, AI service errors)
-- Unit tests for the server action
+<!-- Add feature goals here -->
 
 ## Notes
 
-- Explanations are not saved to the database — regenerated on each click
-- Not available in create/edit forms, only in item drawer read view
-- `isPro` needs to be passed as a prop to the item drawer / code editor
-- Follow existing AI action patterns (see `src/actions/ai.ts`)
-- See `docs/ai-integration-plan.md` for full architectural context
+<!-- Add implementation notes here -->
 
 ## History
+
+- AI Explain Code: new `explainCode` server action in `src/actions/ai.ts` (auth, Pro gate, Zod validation — only accepts `snippet`/`command` typeSlug, rate limiting, OpenAI Responses API with 200-300 word markdown explanation); `CodeEditor` in `src/components/ui/code-editor.tsx` gains `isPro`, `itemTitle`, `typeSlug` props; Sparkles "Explain" button shown in header when `readOnly=true` and typeSlug is snippet/command — Crown icon + tooltip for free users; Loader2 spinner during generation; after first explanation, Code/Explain tab toggle appears in the header; explanation rendered via `MarkdownEditor` in the same container; `ItemDetailView` passes `isPro`, `itemTitle`, `typeSlug` to `CodeEditor` in the read view. Explanations not persisted. 60 tests pass; build passes.
 
 - AI Description Generator: new `generateDescription` server action in `src/actions/ai.ts` (auth, Pro gate, Zod validation, rate limiting via `checkAiRateLimit`, OpenAI Responses API with plain-text output, builds context from title + content + url); `ItemFormFields` in `src/components/items/item-fields.tsx` gains a "Generate" button (Wand2 icon, ghost/sm) inline with the Description label when `isPro=true`; disabled until title is non-empty; on success populates the description field directly. Applies to both Create and Edit flows. 53 tests pass; build passes.
 
