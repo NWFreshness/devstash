@@ -199,69 +199,6 @@ CMD ["npm", "start"]`,
       },
     ],
   },
-  {
-    name: "Terminal Commands",
-    description: "Useful shell commands for everyday development",
-    icon: "Terminal",
-    items: [
-      {
-        title: "Amend last commit without editing message",
-        type: "command",
-        language: "bash",
-        content: "git commit --amend --no-edit",
-      },
-      {
-        title: "Remove unused Docker data",
-        type: "command",
-        language: "bash",
-        content: "docker system prune -af --volumes",
-      },
-      {
-        title: "Find and kill process on a port",
-        type: "command",
-        language: "bash",
-        content: "lsof -ti:3000 | xargs kill -9",
-      },
-      {
-        title: "List outdated npm packages",
-        type: "command",
-        language: "bash",
-        content: "npm outdated --long",
-      },
-    ],
-  },
-  {
-    name: "Design Resources",
-    description: "UI/UX resources and references",
-    icon: "Palette",
-    items: [
-      {
-        title: "Tailwind CSS docs",
-        type: "link",
-        description: "Utility-first CSS reference",
-        isFavorite: true,
-        url: "https://tailwindcss.com/docs",
-      },
-      {
-        title: "shadcn/ui",
-        type: "link",
-        description: "Accessible component library",
-        url: "https://ui.shadcn.com",
-      },
-      {
-        title: "Radix UI",
-        type: "link",
-        description: "Unstyled, accessible primitives",
-        url: "https://www.radix-ui.com",
-      },
-      {
-        title: "Lucide icons",
-        type: "link",
-        description: "Open-source icon set",
-        url: "https://lucide.dev",
-      },
-    ],
-  },
 ];
 
 async function main() {

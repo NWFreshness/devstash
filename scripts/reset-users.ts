@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { prisma } from "../src/lib/prisma";
 
-const KEEP_EMAIL = "creds-test@devstash.local";
+const KEEP_EMAIL = "demo@devstash.io";
 
 async function main() {
   const deleted = await prisma.user.deleteMany({

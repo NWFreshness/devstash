@@ -7,11 +7,12 @@ export interface DemoUser {
   name: string | null;
   email: string;
   image: string | null;
+  isPro: boolean;
 }
 
 export async function getDemoUser(): Promise<DemoUser | null> {
   return prisma.user.findUnique({
     where: { email: DEMO_EMAIL },
-    select: { id: true, name: true, email: true, image: true },
+    select: { id: true, name: true, email: true, image: true, isPro: true },
   });
 }
