@@ -38,6 +38,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  if (!session.user.isPro) {
+    return NextResponse.json({ error: "File uploads require a Pro subscription." }, { status: 403 });
+  }
+
   let formData: FormData;
   try {
     formData = await req.formData();

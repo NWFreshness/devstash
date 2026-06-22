@@ -1,16 +1,42 @@
-# Current Feature
+# Current Feature: Stripe Phase 2 — API Routes, Enforcement & UI
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Add feature goals here -->
+- Checkout API route (`POST /api/billing/checkout`): creates Stripe Checkout session for monthly or yearly subscription
+- Portal API route (`POST /api/billing/portal`): opens Stripe Customer Portal for subscription management
+- Webhook handler (`POST /api/webhooks/stripe`): syncs `isPro`, `stripeCustomerId`, `stripeSubscriptionId`, `planRenewsAt` from Stripe events
+- Free-tier limits enforced in `createItem` (50 items) and `createCollection` (3 collections) server actions
+- File upload route (`/api/upload`) returns 403 for free users
+- `SubscriptionCard` component in Settings page showing plan status and upgrade/manage buttons
+- `UpgradeCta` inline component for limit-hit messaging
 
 ## Notes
 
-<!-- Add implementation notes here -->
+### API Routes
+- Checkout: accepts `{ interval: "monthly" | "yearly" }`, passes existing `stripeCustomerId` if present, sets `metadata.userId`, returns `{ url }`
+- Portal: returns 400 if no `stripeCustomerId`, returns `{ url }`
+- Webhook: use `req.text()` (not `req.json()`) for raw body — required for Stripe signature verification; add `export const dynamic = "force-dynamic"`
+
+### Webhook Events
+- `checkout.session.completed` → store `stripeCustomerId`, set `isPro: true`
+- `customer.subscription.created/updated` → set `isPro` based on `status === "active" || "trialing"`; update `stripeSubscriptionId`, `planRenewsAt` (from `current_period_end * 1000`)
+- `customer.subscription.deleted` → set `isPro: false`, clear `stripeSubscriptionId` and `planRenewsAt`
+
+### SubscriptionCard
+- Free state: "Free" badge, limit descriptions, two buttons ("Upgrade — $8/mo" and "$72/yr (save 25%)")
+- Pro state: "Pro" badge, renewal date, one "Manage subscription" button
+- Single `loading` boolean covers all buttons
+
+### UpgradeCta
+- Simple dashed-border box, reason text, link to `/settings`. No interactivity.
+
+### Free-tier counts use `demoUser.id` for now (multi-user data queries out of scope)
+### Stripe Customer Portal must be enabled in Stripe Dashboard before portal calls succeed
+### Local webhook testing: `stripe listen --forward-to localhost:3333/api/webhooks/stripe`
 
 ## History
 
