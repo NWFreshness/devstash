@@ -2,24 +2,19 @@
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Replace the plain text language `<Input>` with a `<Select>` dropdown of common languages for snippet and command item types
-- Move the language selector above the content/CodeEditor so it's visible before typing
-- Selecting a language immediately applies Monaco syntax highlighting in the editor as you type
-- Applies to both the Create Item modal and the Edit Item drawer form
+<!-- Add feature goals here -->
 
 ## Notes
 
-- Changed only `src/components/items/item-fields.tsx`
-- Added `LANGUAGES` array (27 entries: plaintext → yaml)
-- Language Select uses shadcn `<Select>` with the existing Select components already imported in other places; added import here
-- Language block moved above the `showContent` block so the dropdown appears above the editor
-- Default value falls back to `"plaintext"` when `values.language` is empty so the Select always has a valid selection
+<!-- Add implementation notes here -->
 
 ## History
+
+- Language Dropdown for Code Editor: replaced the plain text language `<Input>` with a shadcn `<Select>` dropdown (27 languages, plaintext → yaml) in `src/components/items/item-fields.tsx`. Language selector moved above the content/CodeEditor so it's visible before typing; selecting a language immediately applies Monaco syntax highlighting. Default falls back to `"plaintext"` when no language is stored. Applies to both the Create Item modal and Edit Item drawer (both use `ItemFormFields`). 44 tests green; build passes.
 
 - Stripe Phase 2 — API Routes, Enforcement & UI: new `src/app/api/billing/checkout/route.ts` (POST creates Stripe Checkout session for monthly/yearly, passes existing `stripeCustomerId` if present, sets `metadata.userId`); new `src/app/api/billing/portal/route.ts` (POST opens Stripe Customer Portal, 400 if no customer); new `src/app/api/webhooks/stripe/route.ts` (uses `req.text()` for raw body, handles `checkout.session.completed` → set `isPro: true` + store `stripeCustomerId`; `customer.subscription.created/updated` → sync `isPro`/`stripeSubscriptionId`/`planRenewsAt` from `subscription.items.data[0].current_period_end`; `customer.subscription.deleted` → clear all). Free-tier enforcement: `createItem` checks 50-item limit via `isAtItemLimit`, `createCollection` checks 3-collection limit via `isAtCollectionLimit`; `/api/upload` returns 403 for non-Pro users. New `src/components/billing/subscription-card.tsx`: client component with Free/Pro states, single `loading` boolean, two upgrade buttons (monthly/yearly) or one manage button. New `src/components/billing/upgrade-cta.tsx`: dashed-border inline CTA with link to `/settings`. Settings page fetches `getUserBilling` in `Promise.all` and renders `SubscriptionCard` as first card. Note: `current_period_end` moved to `subscription.items.data[0]` in Stripe API `2026-05-27.dahlia`. 44 tests green; build passes.
 
