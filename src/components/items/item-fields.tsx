@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Check, Sparkles, X } from "lucide-react";
+import { Check, Sparkles, Wand2, X } from "lucide-react";
 import { toast } from "sonner";
 
 import type { CREATE_ITEM_TYPES } from "@/lib/validations/item";
 import { CONTENT_TYPES, LANGUAGE_TYPES, MARKDOWN_TYPES } from "@/lib/item-type-sets";
-import { generateAutoTags } from "@/actions/ai";
+import { generateAutoTags, generateDescription } from "@/actions/ai";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,12 +98,29 @@ export function ItemFormFields({
 }: ItemFormFieldsProps) {
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [suggesting, startSuggesting] = useTransition();
+  const [generatingDesc, startGeneratingDesc] = useTransition();
 
   const showContent = CONTENT_TYPES.has(typeSlug);
   const showLanguage = LANGUAGE_TYPES.has(typeSlug);
   const showMarkdown = MARKDOWN_TYPES.has(typeSlug);
   const showUrl = typeSlug === "link";
   const showFileUpload = FILE_TYPES.has(typeSlug);
+
+  function handleGenerateDescription() {
+    startGeneratingDesc(async () => {
+      const result = await generateDescription({
+        title: values.title,
+        content: values.content || undefined,
+        url: values.url || undefined,
+        typeSlug,
+      });
+      if (result.success) {
+        handlers.onDescriptionChange(result.data);
+      } else {
+        toast.error(result.error);
+      }
+    });
+  }
 
   function handleSuggestTags() {
     startSuggesting(async () => {
@@ -148,7 +165,22 @@ export function ItemFormFields({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor={`${idPrefix}-description`}>Description</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor={`${idPrefix}-description`}>Description</Label>
+          {isPro && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-6 gap-1 px-2 text-xs text-muted-foreground"
+              onClick={handleGenerateDescription}
+              disabled={generatingDesc || !values.title.trim()}
+            >
+              <Wand2 size={12} />
+              {generatingDesc ? "Generating..." : "Generate"}
+            </Button>
+          )}
+        </div>
         <Textarea
           id={`${idPrefix}-description`}
           value={values.description}

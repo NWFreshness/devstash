@@ -1,16 +1,27 @@
-# Current Feature
+# Current Feature: AI Description Generator
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Add feature goals here -->
+- Add a small icon button next to the description field in item forms (both Create and Edit)
+- Clicking the button calls an AI action that reads the current title and content inputs
+- AI generates a 1-2 sentence concise description and populates the description field
+- Works for all item types using whatever information is available (title, content, url, etc.)
+- No save required before generating — reads live form values
+- Pro-only feature, gated the same way as AI auto-tagging
 
 ## Notes
 
-<!-- Add implementation notes here -->
+- Mirror the pattern used by AI auto-tagging (`generateAutoTags` in `src/actions/ai.ts`)
+- Use `gpt-5-nano` via the existing OpenAI singleton in `src/lib/openai.ts`
+- Prompt should instruct the model to return a plain 1-2 sentence description (no JSON wrapper needed)
+- Button should be a small icon (e.g. Sparkles or Wand2) placed inline with the Description label, similar to the "Suggest Tags" button
+- Apply the existing AI rate limiter pattern (`checkAiRateLimit`)
+- If title and content are both empty, disable or skip the call gracefully
+- `ItemFormFields` in `src/components/items/item-fields.tsx` is where the UI change goes
 
 ## History
 
