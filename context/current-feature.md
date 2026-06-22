@@ -1,24 +1,16 @@
-# Current Feature: AI Prompt Optimization
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add an "Optimize" button to the `CodeEditor` header for `prompt` item types (Pro-only, like the "Explain" button on snippets/commands)
-- New `optimizePrompt` server action in `src/actions/ai.ts`: auth, Pro gate, Zod validation, rate limiting, OpenAI call that analyzes and rewrites the prompt for clarity/effectiveness, returns the improved version
-- After optimization, show the result in a diff-style or side-by-side preview within the drawer — user can accept (replace current content) or dismiss
-- Free users see a Crown icon + tooltip upgrade CTA instead of the active button
-- Applies only in read view (like Explain Code); the button is hidden in edit mode
+<!-- Add feature goals here -->
 
 ## Notes
 
-- Follow the same pattern as `explainCode` / `CodeEditor` "Explain" button: button in the editor header, `isPro`/`itemTitle`/`typeSlug` props flow from `ItemDetailView` → `CodeEditor`
-- Only activate for `typeSlug === "prompt"`
-- Rate limiting reuses `checkAiRateLimit` (same 20 req/hr bucket or a separate one if preferred)
-- Result is NOT persisted — user copies or manually replaces; ask if they want to use it via an Accept/Dismiss UI
-- The "ask if user wants to use the updated prompt" UX: show optimized text with Accept and Dismiss buttons — Accept copies into the editor content (switches to edit mode and populates), Dismiss clears the optimization panel
+<!-- Add implementation notes here -->
 
 ## History
 
@@ -50,3 +42,4 @@ In Progress
 - AI Auto-Tagging: new `src/lib/openai.ts` (OpenAI singleton, `AI_MODEL = 'gpt-5-nano'`); new `src/actions/ai.ts` (`generateAutoTags` server action — auth, Pro gate, Zod validation, rate limiting, OpenAI Responses API with `json_object` format, handles both `{"tags":[...]}` and `[...]` response shapes, normalizes to lowercase, caps at 5 tags); AI rate limiter added to `src/lib/rate-limit.ts` (`aiTag`: 20 req/hour per user, new `checkAiRateLimit(userId)` export). UI: `isPro` prop threaded from `AppShell` → `ItemDrawerProvider` → `ItemDetailView` → `ItemEditForm`, and `TopBar` → `CreateItemDialog`; `items/[type]/page.tsx` fetches `isPro` from session. `ItemFormFields` renders a "Suggest Tags" button (Sparkles icon, ghost/sm) next to the Tags label when `isPro=true`; suggested tags appear as inline badges with per-tag accept (Check) and reject (X) controls; accepted tags are appended to the comma-separated tags string. `openai` package added. `OPENAI_API_KEY` documented in `.env.example`. 53 tests pass; build passes.
 - AI Description Generator: new `generateDescription` server action in `src/actions/ai.ts` (auth, Pro gate, Zod validation, rate limiting via `checkAiRateLimit`, OpenAI Responses API with plain-text output, builds context from title + content + url); `ItemFormFields` in `src/components/items/item-fields.tsx` gains a "Generate" button (Wand2 icon, ghost/sm) inline with the Description label when `isPro=true`; disabled until title is non-empty; on success populates the description field directly. Applies to both Create and Edit flows. 53 tests pass; build passes.
 - AI Explain Code: new `explainCode` server action in `src/actions/ai.ts` (auth, Pro gate, Zod validation — only accepts `snippet`/`command` typeSlug, rate limiting, OpenAI Responses API with 200-300 word markdown explanation); `CodeEditor` in `src/components/ui/code-editor.tsx` gains `isPro`, `itemTitle`, `typeSlug` props; Sparkles "Explain" button shown in header when `readOnly=true` and typeSlug is snippet/command — Crown icon + tooltip for free users; Loader2 spinner during generation; after first explanation, Code/Explain tab toggle appears in the header; explanation rendered via `MarkdownEditor` in the same container; `ItemDetailView` passes `isPro`, `itemTitle`, `typeSlug` to `CodeEditor` in the read view. Explanations not persisted. 60 tests pass; build passes.
+- AI Prompt Optimization: new `optimizePrompt` server action in `src/actions/ai.ts` (auth, Pro gate, Zod validation — only accepts `typeSlug: "prompt"`, rate limiting via `checkAiRateLimit`, OpenAI Responses API rewrites prompt for clarity/effectiveness, returns plain text); `MarkdownEditor` in `src/components/ui/markdown-editor.tsx` gains `isPro`, `itemTitle`, `typeSlug`, `onAcceptOptimization` props; Sparkles "Optimize" button in header when `readOnly=true` and `typeSlug === "prompt"` — Crown icon + tooltip for free users; Loader2 spinner during generation; optimized text shown in a panel below the preview with Accept (purple) and Dismiss buttons; Accept calls `onAcceptOptimization(text)` and clears the panel. `ItemEditForm` gains optional `initialContent` prop to override `detail.content` as initial state. `ItemDetailView` stores `pendingContent` state; `onAcceptOptimization` sets it and switches to edit mode so `ItemEditForm` opens pre-filled with the optimized prompt. 67 tests pass; build passes.
