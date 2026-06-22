@@ -24,9 +24,10 @@ export function TopBar({
         <Link
           href="/favorites"
           className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          aria-label="Favorites"
           title="Favorites"
         >
-          <Star size={16} />
+          <Star size={16} aria-hidden />
         </Link>
         <CreateCollectionDialog />
         <CreateItemDialog collections={collections} />

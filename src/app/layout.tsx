@@ -29,6 +29,9 @@ export default function RootLayout({
       className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <a href="#main-content" className="skip-to-main">
+          Skip to main content
+        </a>
         {children}
         <Toaster theme="dark" />
       </body>

@@ -76,11 +76,22 @@ export function CollectionCard({
     });
   }
 
+  function handleCardKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      router.push(cardHref);
+    }
+  }
+
   return (
     <>
       <div
-        className="block cursor-pointer"
+        role="button"
+        tabIndex={0}
+        className="block cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg"
         onClick={() => router.push(cardHref)}
+        onKeyDown={handleCardKeyDown}
+        aria-label={`Open collection ${collection.name}`}
       >
         <Card
           size="sm"

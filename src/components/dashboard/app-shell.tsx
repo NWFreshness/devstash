@@ -49,7 +49,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
               searchItems={searchItems}
               searchCollections={searchCollections}
             />
-            <div className="flex-1 overflow-auto p-6">{children}</div>
+            <main id="main-content" className="flex-1 overflow-auto p-6">{children}</main>
           </ItemDrawerProvider>
         </EditorPreferencesProvider>
       </SidebarInset>
