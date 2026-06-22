@@ -1,32 +1,20 @@
-# Current Feature: AI Auto-Tagging
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create `src/lib/openai.ts` with OpenAI client singleton and `AI_MODEL = 'gpt-5-nano'` constant
-- Add AI rate limit config (20 req/hour per user) to the existing rate limit utility
-- Create `generateAutoTags` server action with auth, Pro gating, Zod validation, and rate limiting
-- Add "Suggest Tags" button (Sparkles icon, ghost variant) in the tags area of CreateItemDialog and ItemDrawer edit mode — hidden for free users
-- Display AI-suggested tags as badges with per-tag accept (check) and reject (X) controls
-- Accepted tags are appended to the item's existing tag list; tags are freeform strings
-- Truncate content to 2000 chars before the API call
-- Error handling via toast for Pro gating, rate limit, and AI service errors
-- Unit tests for the `generateAutoTags` server action
+<!-- Add feature goals here -->
 
 ## Notes
 
-- Use the **Responses API** (`client.responses.create()`), NOT Chat Completions — gpt-5-nano returns empty content from Chat Completions
-  - `instructions` = system prompt, `input` = user message, `text: { format: { type: 'json_object' } }` for JSON output
-  - Read the content from `response.output_text`
-- Model may return `{"tags": [...]}` or `["a","b"]` — handle both; normalize to lowercase
-- Do NOT use `zodResponseFormat` — hits token limits; parse JSON manually
-- `OPENAI_API_KEY` is already in `.env`
-- `isPro` is available server-side via session; UI gating requires passing `isPro` as a prop to the edit components
+<!-- Add implementation notes here -->
 
 ## History
+
+- AI Auto-Tagging: new `src/lib/openai.ts` (OpenAI singleton, `AI_MODEL = 'gpt-5-nano'`); new `src/actions/ai.ts` (`generateAutoTags` server action — auth, Pro gate, Zod validation, rate limiting, OpenAI Responses API with `json_object` format, handles both `{"tags":[...]}` and `[...]` response shapes, normalizes to lowercase, caps at 5 tags); AI rate limiter added to `src/lib/rate-limit.ts` (`aiTag`: 20 req/hour per user, new `checkAiRateLimit(userId)` export). UI: `isPro` prop threaded from `AppShell` → `ItemDrawerProvider` → `ItemDetailView` → `ItemEditForm`, and `TopBar` → `CreateItemDialog`; `items/[type]/page.tsx` fetches `isPro` from session. `ItemFormFields` renders a "Suggest Tags" button (Sparkles icon, ghost/sm) next to the Tags label when `isPro=true`; suggested tags appear as inline badges with per-tag accept (Check) and reject (X) controls; accepted tags are appended to the comma-separated tags string. `openai` package added. `OPENAI_API_KEY` documented in `.env.example`. 53 tests pass; build passes.
 
 - Language Dropdown for Code Editor: replaced the plain text language `<Input>` with a shadcn `<Select>` dropdown (27 languages, plaintext → yaml) in `src/components/items/item-fields.tsx`. Language selector moved above the content/CodeEditor so it's visible before typing; selecting a language immediately applies Monaco syntax highlighting. Default falls back to `"plaintext"` when no language is stored. Applies to both the Create Item modal and Edit Item drawer (both use `ItemFormFields`). 44 tests green; build passes.
 
